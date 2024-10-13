@@ -1,5 +1,7 @@
 # Lyra First Person Shooter
-This is my attempt at implementing first person character based on Lyra. This repo is a game feature plugin that only depends on the base Lyra classes and assets (no dependencies on ShooterCore).
+This is my attempt at implementing first person character based on Lyra. This repo is a game feature plugin that only depends on the base Lyra classes and assets (no dependencies on ShooterCore). [Here](https://youtu.be/F8nx2BPH0cs) is a quick demo.
+
+This setup is inspired by [philspaz](https://github.com/philspaz/AfootLyraExtension) and [Octahedron](https://www.youtube.com/playlist?list=PLxYB4IVFm8q6tf3boC1Nm4A8AB2RMCpXn)
 
 ## Prerequisites
 - Unreal Engine 5.4

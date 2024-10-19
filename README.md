@@ -12,10 +12,7 @@ I tried my best to make minimal changes to the base Lyra classes, but changes he
 
 ### ALyraCharacter -> LyraGame/Character/LyraCharacter.h
 - export LYRAGAME_API for ALyraCharacter
-- add a protected function that returns the camera component:
-    ```cpp
-    FORCEINLINE ULyraCameraComponent* GetCameraComponent() { return CameraComponent; }
-    ```
+- Turn CameraComponent into a protected variable
 
 ### ULyraDevelopmentStatics -> LyraGame/System/LyraDevelopmentStatics.h
 - export LYRAGAME_API for ULyraDevelopmentStatics 
@@ -84,44 +81,6 @@ make these changes:
 ### ULyraWeaponUserInterface -> LyraGame/UI/Weapons/LyraWeaponUserInterface.h
 - export LYRAGAME_API for ULyraWeaponUserInterface
 - turn RebuildWidgetFromWeapon() into a protected method
-
-### ULyraCameraMode -> LyraGame/Camera/LyraCameraMode.h
-- create this new protected property:
-	```cpp
-	UPROPERTY(EditDefaultsOnly, Category = "View")
-	bool bIsOverrideFOV = false;
-	```
-- create these public functions
-	```cpp
-	bool GetIsOverrideFOV() { return bIsOverrideFOV; }
-	void SetFieldOfView(float newFOV) { FieldOfView = newFOV; }
-	```
-
-### ULyraCameraModeStack ->LyraGame/Camera/LyraCameraMode.cpp
-- add an FOV override to the PuchCameraMode Method:
-	```cpp
-    void ULyraCameraModeStack::PushCameraMode(TSubclassOf<ULyraCameraMode> CameraModeClass)
-    {
-        // ...
-        // ...
-        // ...
-
-        ULyraCameraMode* CameraMode = GetCameraModeInstance(CameraModeClass);
-        check(CameraMode);
-
-        if (CameraMode->GetIsOverrideFOV())
-        {
-            const float newFOV = CameraMode->GetLyraCameraComponent()->FieldOfView;
-            CameraMode->SetFieldOfView(newFOV);
-        }
-
-        int32 StackSize = CameraModeStack.Num();
-
-        // ...
-        // ...
-        // ...
-    }
-	```
 
 ### ULyraWeaponStateComponent -> LyraGame/Weapons/LyraWeaponStateComponent.h
 - export LYRAGAME_API for ULyraWeaponStateComponent

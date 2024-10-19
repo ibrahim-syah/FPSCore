@@ -9,6 +9,7 @@
 class UTimelineComponent;
 class USpringArmComponent;
 class UFPSRangedWeaponInstance;
+class UCameraComponent;
 
 /**
  * 
@@ -140,6 +141,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	USkeletalMeshComponent* Cam_Skel;
 
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	TObjectPtr<UCameraComponent> FPCameraComponent;
+
 	///////////////////////////////////////////////////////////////////// Cosmetics
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	TArray<USkeletalMeshComponent*> FPCosmetics;
@@ -211,7 +215,7 @@ protected:
 	void ProcCamAnim(FVector& CamOffsetArg, float& CamAnimAlphaArg);
 	FVector PrevHandLoc;
 	FVector CamOffset;
-	float CamStrength{ 50.f };
+	float CamStrength{ 25.f };
 	FVector CamOffsetCurrent;
 	float CamAnimAlpha{ 0.f };
 

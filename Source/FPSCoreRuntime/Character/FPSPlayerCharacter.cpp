@@ -4,7 +4,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Character/LyraCharacterMovementComponent.h"
 #include "Weapons/FPSRangedWeaponInstance.h"
+#include "Camera/CameraComponent.h"
 #include "Camera/LyraCameraComponent.h"
+#include "Player/LyraPlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/TimelineComponent.h"
@@ -29,7 +31,10 @@ AFPSPlayerCharacter::AFPSPlayerCharacter(const FObjectInitializer& ObjectInitial
 	LyraMoveComp->BrakingDecelerationFalling = 200.f;
 	LyraMoveComp->AirControl = 0.275f;
 
-	/*Cam_Root = CreateDefaultSubobject<USpringArmComponent>(TEXT("Cam_Root"));
+	FP_Root = CreateDefaultSubobject<USceneComponent>(TEXT("FP_Root"));
+	FP_Root->SetupAttachment(RootComponent);
+
+	Cam_Root = CreateDefaultSubobject<USpringArmComponent>(TEXT("Cam_Root"));
 	Cam_Root->SetupAttachment(FP_Root);
 	Cam_Root->SetRelativeLocation(FVector(0.f, 0.f, 60.f));
 	Cam_Root->TargetArmLength = 0;
@@ -41,26 +46,23 @@ AFPSPlayerCharacter::AFPSPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 	Cam_Skel = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Cam_Skel"));
 	Cam_Skel->SetupAttachment(Cam_Root);
-	Cam_Skel->SetRelativeLocation(FVector(0.f, 0.f, -60.f));*/
+	Cam_Skel->SetRelativeLocation(FVector(0.f, 0.f, -60.f));
 
-	ULyraCameraComponent* camera = GetCameraComponent();
-	camera->SetRelativeLocation(FVector(0.f, 0.0f, 60.f));
-	camera->SetupAttachment(RootComponent);
-	//camera->bUsePawnControlRotation = true;
-	camera->PostProcessSettings.bOverride_VignetteIntensity = true;
-
-	FP_Root = CreateDefaultSubobject<USceneComponent>(TEXT("FP_Root"));
-	FP_Root->SetupAttachment(camera);
+	FPCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FPCameraComponent"));
+	FPCameraComponent->SetRelativeLocation(FVector(0.f, 0.0f, 60.f));
+	FPCameraComponent->SetupAttachment(Cam_Skel);
+	FPCameraComponent->bUsePawnControlRotation = true;
+	FPCameraComponent->PostProcessSettings.bOverride_VignetteIntensity = true;
 
 	Mesh_Root = CreateDefaultSubobject<USpringArmComponent>(TEXT("Mesh_Root"));
 	Mesh_Root->SetupAttachment(FP_Root);
-	Mesh_Root->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+	Mesh_Root->SetRelativeLocation(FVector(0.f, 0.f, 60.f));
 	Mesh_Root->TargetArmLength = 0;
 	Mesh_Root->bDoCollisionTest = false;
-	//Mesh_Root->bUsePawnControlRotation = true;
-	//Mesh_Root->bInheritPitch = true;
-	//Mesh_Root->bInheritYaw = true;
-	//Mesh_Root->bInheritRoll = false;
+	Mesh_Root->bUsePawnControlRotation = true;
+	Mesh_Root->bInheritPitch = true;
+	Mesh_Root->bInheritYaw = true;
+	Mesh_Root->bInheritRoll = false;
 
 	Offset_Root_LocationOffsetBase = FVector(0.f, 0.f, -60.f);
 	Offset_Root = CreateDefaultSubobject<USceneComponent>(TEXT("Offset_Root"));
@@ -120,22 +122,33 @@ void AFPSPlayerCharacter::PossessedBy(AController* NewController)
 
 void AFPSPlayerCharacter::ChangePOV(bool bShouldChangeTo1P)
 {
-	FirstPersonMesh->SetVisibility(bShouldChangeTo1P, true);
-	FirstPersonLegMesh->SetVisibility(bShouldChangeTo1P, true);
-	GetMesh()->SetVisibility(!bShouldChangeTo1P, true);
-	bIsFirstPerson = bShouldChangeTo1P;
+	ALyraPlayerController* PC = GetLyraPlayerController();
+	if (PC && PC->IsLocalPlayerController())
+	{
+		FirstPersonMesh->SetVisibility(bShouldChangeTo1P, true);
+		FirstPersonLegMesh->SetVisibility(bShouldChangeTo1P, true);
+		GetMesh()->SetVisibility(!bShouldChangeTo1P, true);
+		bIsFirstPerson = bShouldChangeTo1P;
 
-	if (bShouldChangeTo1P)
-	{
-		// Move third person mesh back so that the shadow doesn't look disconnected
-		GetMesh()->SetRelativeLocation(StartingThirdPersonMeshLocation + FVector(InvisibleBodyMeshOffsetLength, 0.0f, 0.0f));
-		FirstPersonLegMesh->SetRelativeLocation(StartingThirdPersonMeshLocation + FVector(InvisibleBodyMeshOffsetLength, 0.0f, 0.0f));
-	}
-	else
-	{
-		// Reset the third person mesh
-		GetMesh()->SetRelativeLocation(StartingThirdPersonMeshLocation);
-		FirstPersonLegMesh->SetRelativeLocation(StartingThirdPersonMeshLocation);
+		if (bShouldChangeTo1P)
+		{
+			// Move third person mesh back so that the shadow doesn't look disconnected
+			GetMesh()->SetRelativeLocation(StartingThirdPersonMeshLocation + FVector(InvisibleBodyMeshOffsetLength, 0.0f, 0.0f));
+			FirstPersonLegMesh->SetRelativeLocation(StartingThirdPersonMeshLocation + FVector(InvisibleBodyMeshOffsetLength, 0.0f, 0.0f));
+
+			CameraComponent->Deactivate();
+			FPCameraComponent->Activate();
+		}
+		else
+		{
+			// Reset the third person mesh
+			GetMesh()->SetRelativeLocation(StartingThirdPersonMeshLocation);
+			FirstPersonLegMesh->SetRelativeLocation(StartingThirdPersonMeshLocation);
+
+			FPCameraComponent->Deactivate();
+			CameraComponent->Activate();
+		}
+		PC->SetViewTarget(this);
 	}
 }
 
@@ -459,7 +472,7 @@ void AFPSPlayerCharacter::UpdateLookInputVars(FRotator CamRotPrev)
 
 	// Step 2: finding the rotation rate of our camera and smoothing
 	// the result to use for our weapon sway
-	CamRotCurrent = GetCameraComponent()->GetComponentRotation();
+	CamRotCurrent = FPCameraComponent->GetComponentRotation();
 	FRotator deltaCamRot = UKismetMathLibrary::NormalizedDeltaRotator(CamRotCurrent, CamRotPrev);
 	float deltaCamRotPitch, deltaCamRotYaw, deltaCamRotRoll;
 	UKismetMathLibrary::BreakRotator(deltaCamRot, deltaCamRotRoll, deltaCamRotPitch, deltaCamRotYaw);
@@ -520,8 +533,8 @@ void AFPSPlayerCharacter::ADSTLCallback(float val)
 	ADSAlphaInversed = 1.f - ADSAlpha;
 	ADSAlphaLerp = FMath::Lerp(0.2f, 1.f, ADSAlphaInversed);
 
-	GetCameraComponent()->SetFieldOfView(FMath::Lerp(FOVBase, FOVADS, ADSAlpha));
-	GetCameraComponent()->PostProcessSettings.VignetteIntensity = FMath::Lerp(0.4f, 0.7f, ADSAlpha);
+	FPCameraComponent->SetFieldOfView(FMath::Lerp(FOVBase, FOVADS, ADSAlpha));
+	FPCameraComponent->PostProcessSettings.VignetteIntensity = FMath::Lerp(0.4f, 0.7f, ADSAlpha);
 }
 ////////////////////////////////////////////////////////////////////////////////////// END Procedural Anim
 

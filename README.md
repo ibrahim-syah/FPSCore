@@ -14,6 +14,9 @@ I tried my best to make minimal changes to the base Lyra classes, but changes he
 - export LYRAGAME_API for ALyraCharacter
 - Turn CameraComponent into a protected variable
 
+### FLyraAnimLayerSelectionSet -> LyraGame/Cosmetics/LyraCosmeticAnimationTypes.h
+- export LYRAGAME_API for FLyraAnimLayerSelectionSet
+
 ### ULyraDevelopmentStatics -> LyraGame/System/LyraDevelopmentStatics.h
 - export LYRAGAME_API for ULyraDevelopmentStatics 
 

@@ -21,31 +21,31 @@ class FPSCORERUNTIME_API UFPSRangedWeaponInstance : public ULyraRangedWeaponInst
 public:
 	UFPSRangedWeaponInstance(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	virtual void SpawnEquipmentActors_V2(const TArray<FMyEquipmentActorToSpawn>& ActorsToSpawn);
+	UFUNCTION(BlueprintPure, Category = Equipment)
+	TArray<AActor*> GetSpawnedActors_FP() const { return SpawnedActors_FP; }
 
-	void Tick(float DeltaSeconds);
+	virtual void SpawnEquipmentActors_FP(const TArray<FMyEquipmentActorToSpawn>& ActorsToSpawn);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Animation)
-	FVector GetFirstPersonADSOffset() const;
+	//void Tick(float DeltaSeconds);
+
+	virtual void DestroyEquipmentActors() override;
 
 
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
-	FMyAnimLayerSelectionSet EquippedAnimSet_V2;
+	FLyraAnimLayerSelectionSet EquippedAnimSet_FP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
-	FMyAnimLayerSelectionSet UnequippedAnimSet_V2;
+	FLyraAnimLayerSelectionSet UnequippedAnimSet_FP;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = Animation)
-	void PickBestAnimLayer_V2(
+	void PickBestAnimLayer_FP(
 		bool bEquipped,
 		const FGameplayTagContainer& CosmeticTags,
-		TSubclassOf<UAnimInstance>& TPFullBody_AnimLayer,
-		TSubclassOf<UAnimInstance>& FPArms_AnimLayer,
-		TSubclassOf<UAnimInstance>& FPLegs_AnimLayer
+		TSubclassOf<UAnimInstance>& FPArms_AnimLayer
 		) const;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
-	FVector FirstPersonADSOffset;
+	UPROPERTY(Replicated)
+	TArray<TObjectPtr<AActor>> SpawnedActors_FP;
 };

@@ -5,23 +5,26 @@
 #include "Character/FPSPlayerCharacter.h"
 #include "Weapons/MyWeaponActor.h"
 #include "Equipment/FPSEquipmentDefinition.h"
+#include "Net/UnrealNetwork.h"
 
 UFPSRangedWeaponInstance::UFPSRangedWeaponInstance(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 }
 
-void UFPSRangedWeaponInstance::Tick(float DeltaSeconds)
+//void UFPSRangedWeaponInstance::Tick(float DeltaSeconds)
+//{
+//	Super::Tick(DeltaSeconds);
+//}
+
+void UFPSRangedWeaponInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	Super::Tick(DeltaSeconds);
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, SpawnedActors_FP);
 }
 
-FVector UFPSRangedWeaponInstance::GetFirstPersonADSOffset() const
-{
-	return FirstPersonADSOffset;
-}
-
-void UFPSRangedWeaponInstance::SpawnEquipmentActors_V2(const TArray<FMyEquipmentActorToSpawn>& ActorsToSpawn)
+void UFPSRangedWeaponInstance::SpawnEquipmentActors_FP(const TArray<FMyEquipmentActorToSpawn>& ActorsToSpawn)
 {
 	
 	if (APawn* OwningPawn = GetPawn())
@@ -34,34 +37,37 @@ void UFPSRangedWeaponInstance::SpawnEquipmentActors_V2(const TArray<FMyEquipment
 			USceneComponent* AttachTarget = OwningPawn->GetRootComponent();
 			if (AFPSPlayerCharacter* Char = Cast<AFPSPlayerCharacter>(OwningPawn))
 			{
-				if (SpawnInfo.IsFP) {
-					AttachTarget = Char->GetFirstPersonMesh();
-					Char->Client_SetFPWeaponProps(true, FirstPersonADSOffset, SpawnInfo.FP_OffsetRoot_LocationOffset); // Currently this means we can only have one fp actor for each equipment, because multiple actors mean the last actor will override the offsets
-				}
-				else
-				{
-					AttachTarget = Char->GetMesh();
-				}
+				AttachTarget = Char->GetFirstPersonMesh();
+				Char->Client_SetFPWeaponProps(true, SpawnInfo.FP_ADSOffset, SpawnInfo.FP_OffsetRoot_LocationOffset); // Currently this means we can only have one fp actor for each equipment, because multiple actors mean the last actor will override the offsets
 			}
 			NewActor->FinishSpawning(FTransform::Identity, /*bIsDefaultTransform=*/ true);
 			NewActor->SetActorRelativeTransform(SpawnInfo.AttachTransform);
 			NewActor->AttachToComponent(AttachTarget, FAttachmentTransformRules::KeepRelativeTransform, SpawnInfo.AttachSocket);
 
-			SpawnedActors.Add(NewActor);
+			SpawnedActors_FP.Add(NewActor);
 		}
 	}
 }
 
-void UFPSRangedWeaponInstance::PickBestAnimLayer_V2(
+void UFPSRangedWeaponInstance::DestroyEquipmentActors()
+{
+	Super::DestroyEquipmentActors();
+
+	for (AActor* Actor : SpawnedActors_FP)
+	{
+		if (Actor)
+		{
+			Actor->Destroy();
+		}
+	}
+}
+
+void UFPSRangedWeaponInstance::PickBestAnimLayer_FP(
 bool bEquipped,
 		const FGameplayTagContainer& CosmeticTags,
-		TSubclassOf<UAnimInstance>& TPFullBody_AnimLayer,
-		TSubclassOf<UAnimInstance>& FPArms_AnimLayer,
-		TSubclassOf<UAnimInstance>& FPLegs_AnimLayer
+		TSubclassOf<UAnimInstance>& FPArms_AnimLayer
 ) const
 {
-	const FMyAnimLayerSelectionSet& SetToQuery = (bEquipped ? EquippedAnimSet_V2 : UnequippedAnimSet_V2);
-	TPFullBody_AnimLayer = SetToQuery.SelectBestTPFullBodyLayer(CosmeticTags);
-	FPArms_AnimLayer = SetToQuery.SelectBestFPArmsLayer(CosmeticTags);
-	FPLegs_AnimLayer = SetToQuery.SelectBestFPLegsLayer(CosmeticTags);
+	const FLyraAnimLayerSelectionSet& SetToQuery_FP = (bEquipped ? EquippedAnimSet_FP : UnequippedAnimSet_FP);
+	FPArms_AnimLayer = SetToQuery_FP.SelectBestLayer(CosmeticTags);
 }

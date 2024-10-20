@@ -12,6 +12,16 @@
 #include "Net/UnrealNetwork.h"
 #include "Engine/ActorChannel.h"
 
+//////////////////////////////////////////////////////////////////////
+// FMyAppliedEquipmentEntry
+
+FString FMyAppliedEquipmentEntry::GetDebugString() const
+{
+	return FString::Printf(TEXT("%s of %s"), *GetNameSafe(Instance), *GetNameSafe(EquipmentDefinition.Get()));
+}
+
+//////////////////////////////////////////////////////////////////////
+// FMyEquipmentList
 
 UFPSRangedWeaponInstance* FMyEquipmentList::AddEntry_V2(TSubclassOf<UFPSEquipmentDefinition> EquipmentDefinition)
 {
@@ -29,10 +39,10 @@ UFPSRangedWeaponInstance* FMyEquipmentList::AddEntry_V2(TSubclassOf<UFPSEquipmen
 		InstanceType = UFPSEquipmentDefinition::StaticClass();
 	}
 
-	FLyraAppliedEquipmentEntry& NewEntry = Entries.AddDefaulted_GetRef();
+	FMyAppliedEquipmentEntry& NewEntry = Entries.AddDefaulted_GetRef();
 	NewEntry.SetEquipmentDefinition(EquipmentDefinition);
-	NewEntry.SetEquipmentInstance(NewObject<ULyraEquipmentInstance>(OwnerComponent->GetOwner(), InstanceType));  //@TODO: Using the actor instead of component as the outer due to UE-127172
-	Result = Cast<UFPSRangedWeaponInstance>(NewEntry.GetEquipmentInstance());
+	NewEntry.SetEquipmentInstance(NewObject<UFPSRangedWeaponInstance>(OwnerComponent->GetOwner(), InstanceType));  //@TODO: Using the actor instead of component as the outer due to UE-127172
+	Result = NewEntry.GetEquipmentInstance();
 
 	if (ULyraAbilitySystemComponent* ASC = GetAbilitySystemComponent())
 	{
@@ -46,7 +56,8 @@ UFPSRangedWeaponInstance* FMyEquipmentList::AddEntry_V2(TSubclassOf<UFPSEquipmen
 		//@TODO: Warning logging?
 	}
 	
-	Result->SpawnEquipmentActors_V2(EquipmentCDO->ActorsToSpawn_V2);
+	Result->SpawnEquipmentActors(EquipmentCDO->ActorsToSpawn);
+	Result->SpawnEquipmentActors_FP(EquipmentCDO->ActorsToSpawn_FP);
 
 	MarkItemDirty(NewEntry);
 
@@ -57,7 +68,7 @@ void FMyEquipmentList::RemoveEntry(ULyraEquipmentInstance* Instance)
 {
 	for (auto EntryIt = Entries.CreateIterator(); EntryIt; ++EntryIt)
 	{
-		FLyraAppliedEquipmentEntry& Entry = *EntryIt;
+		FMyAppliedEquipmentEntry& Entry = *EntryIt;
 		if (Entry.Instance == Instance)
 		{
 			if (ULyraAbilitySystemComponent* ASC = GetAbilitySystemComponent())
@@ -85,7 +96,7 @@ void FMyEquipmentList::PreReplicatedRemove(const TArrayView<int32> RemovedIndice
 {
 	for (int32 Index : RemovedIndices)
 	{
-		const FLyraAppliedEquipmentEntry& Entry = Entries[Index];
+		const FMyAppliedEquipmentEntry& Entry = Entries[Index];
 		if (Entry.Instance != nullptr)
 		{
 			Entry.Instance->OnUnequipped();
@@ -97,7 +108,7 @@ void FMyEquipmentList::PostReplicatedAdd(const TArrayView<int32> AddedIndices, i
 {
 	for (int32 Index : AddedIndices)
 	{
-		const FLyraAppliedEquipmentEntry& Entry = Entries[Index];
+		const FMyAppliedEquipmentEntry& Entry = Entries[Index];
 		if (Entry.Instance != nullptr)
 		{
 			Entry.Instance->OnEquipped();
@@ -166,7 +177,7 @@ bool UMyEquipmentManagerComponent::ReplicateSubobjects(UActorChannel* Channel, c
 {
 	bool WroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
 
-	for (FLyraAppliedEquipmentEntry& Entry : EquipmentList_V2.Entries)
+	for (FMyAppliedEquipmentEntry& Entry : EquipmentList_V2.Entries)
 	{
 		ULyraEquipmentInstance* Instance = Entry.GetEquipmentInstance();
 
@@ -189,7 +200,7 @@ void UMyEquipmentManagerComponent::UninitializeComponent()
 	TArray<ULyraEquipmentInstance*> AllEquipmentInstances;
 
 	// gathering all instances before removal to avoid side effects affecting the equipment list iterator	
-	for (const FLyraAppliedEquipmentEntry& Entry : EquipmentList_V2.Entries)
+	for (const FMyAppliedEquipmentEntry& Entry : EquipmentList_V2.Entries)
 	{
 		AllEquipmentInstances.Add(Entry.GetEquipmentInstance());
 	}
@@ -209,7 +220,7 @@ void UMyEquipmentManagerComponent::ReadyForReplication()
 	// Register existing LyraEquipmentInstances
 	if (IsUsingRegisteredSubObjectList())
 	{
-		for (const FLyraAppliedEquipmentEntry& Entry : EquipmentList_V2.Entries)
+		for (const FMyAppliedEquipmentEntry& Entry : EquipmentList_V2.Entries)
 		{
 			ULyraEquipmentInstance* Instance = Entry.GetEquipmentInstance();
 
@@ -221,11 +232,11 @@ void UMyEquipmentManagerComponent::ReadyForReplication()
 	}
 }
 
-ULyraEquipmentInstance* UMyEquipmentManagerComponent::GetFirstInstanceOfType_V2(TSubclassOf<ULyraEquipmentInstance> InstanceType)
+UFPSRangedWeaponInstance* UMyEquipmentManagerComponent::GetFirstInstanceOfType_V2(TSubclassOf<UFPSRangedWeaponInstance> InstanceType)
 {
-	for (FLyraAppliedEquipmentEntry& Entry : EquipmentList_V2.Entries)
+	for (FMyAppliedEquipmentEntry& Entry : EquipmentList_V2.Entries)
 	{
-		if (ULyraEquipmentInstance* Instance = Entry.GetEquipmentInstance())
+		if (UFPSRangedWeaponInstance* Instance = Entry.GetEquipmentInstance())
 		{
 			if (Instance->IsA(InstanceType))
 			{
@@ -237,12 +248,12 @@ ULyraEquipmentInstance* UMyEquipmentManagerComponent::GetFirstInstanceOfType_V2(
 	return nullptr;
 }
 
-TArray<ULyraEquipmentInstance*> UMyEquipmentManagerComponent::GetEquipmentInstancesOfType_V2(TSubclassOf<ULyraEquipmentInstance> InstanceType) const
+TArray<UFPSRangedWeaponInstance*> UMyEquipmentManagerComponent::GetEquipmentInstancesOfType_V2(TSubclassOf<UFPSRangedWeaponInstance> InstanceType) const
 {
-	TArray<ULyraEquipmentInstance*> Results;
-	for (const FLyraAppliedEquipmentEntry& Entry : EquipmentList_V2.Entries)
+	TArray<UFPSRangedWeaponInstance*> Results;
+	for (const FMyAppliedEquipmentEntry& Entry : EquipmentList_V2.Entries)
 	{
-		if (ULyraEquipmentInstance* Instance = Entry.GetEquipmentInstance())
+		if (UFPSRangedWeaponInstance* Instance = Entry.GetEquipmentInstance())
 		{
 			if (Instance->IsA(InstanceType))
 			{

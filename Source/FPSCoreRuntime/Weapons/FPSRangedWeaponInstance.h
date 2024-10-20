@@ -25,9 +25,6 @@ public:
 
 	void Tick(float DeltaSeconds);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Animation)
-	FVector GetFirstPersonADSOffset() const;
-
 
 	
 protected:
@@ -45,7 +42,4 @@ protected:
 		TSubclassOf<UAnimInstance>& FPArms_AnimLayer,
 		TSubclassOf<UAnimInstance>& FPLegs_AnimLayer
 		) const;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
-	FVector FirstPersonADSOffset;
 };

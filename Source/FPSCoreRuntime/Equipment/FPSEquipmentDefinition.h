@@ -30,6 +30,9 @@ struct FMyEquipmentActorToSpawn
 
 	UPROPERTY(EditAnywhere, Category = Equipment, meta=(EditCondition="IsFP"))
 	FVector FP_OffsetRoot_LocationOffset;
+
+	UPROPERTY(EditAnywhere, Category = Equipment, meta = (EditCondition = "IsFP"))
+	FVector FP_ADSOffset;
 };
 
 /**

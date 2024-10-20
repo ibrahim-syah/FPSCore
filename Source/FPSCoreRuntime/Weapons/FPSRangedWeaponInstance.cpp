@@ -16,11 +16,6 @@ void UFPSRangedWeaponInstance::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 }
 
-FVector UFPSRangedWeaponInstance::GetFirstPersonADSOffset() const
-{
-	return FirstPersonADSOffset;
-}
-
 void UFPSRangedWeaponInstance::SpawnEquipmentActors_V2(const TArray<FMyEquipmentActorToSpawn>& ActorsToSpawn)
 {
 	
@@ -36,7 +31,7 @@ void UFPSRangedWeaponInstance::SpawnEquipmentActors_V2(const TArray<FMyEquipment
 			{
 				if (SpawnInfo.IsFP) {
 					AttachTarget = Char->GetFirstPersonMesh();
-					Char->Client_SetFPWeaponProps(true, FirstPersonADSOffset, SpawnInfo.FP_OffsetRoot_LocationOffset); // Currently this means we can only have one fp actor for each equipment, because multiple actors mean the last actor will override the offsets
+					Char->Client_SetFPWeaponProps(true, SpawnInfo.FP_ADSOffset, SpawnInfo.FP_OffsetRoot_LocationOffset); // Currently this means we can only have one fp actor for each equipment, because multiple actors mean the last actor will override the offsets
 				}
 				else
 				{

@@ -21,11 +21,11 @@ void UMyLyraWeaponUserInterface::NativeTick(const FGeometry& MyGeometry, float I
 	{
 		if (UMyEquipmentManagerComponent* EquipmentManager = Pawn->FindComponentByClass<UMyEquipmentManagerComponent>())
 		{
-			if (UFPSRangedWeaponInstance* NewInstance = EquipmentManager->GetFirstInstanceOfType_V2<UFPSRangedWeaponInstance>())
+			if (UMyWeaponInstance* NewInstance = EquipmentManager->GetFirstInstanceOfType_V2<UMyWeaponInstance>())
 			{
 				if (NewInstance != CurrentInstance_V2 && NewInstance->GetInstigator() != nullptr)
 				{
-					UFPSRangedWeaponInstance* OldWeapon = CurrentInstance_V2;
+					UMyWeaponInstance* OldWeapon = CurrentInstance_V2;
 					CurrentInstance_V2 = NewInstance;
 					RebuildWidgetFromWeapon();
 					//OnWeaponChanged_V2(OldWeapon, CurrentInstance_V2);

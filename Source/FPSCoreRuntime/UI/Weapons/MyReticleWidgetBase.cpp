@@ -28,7 +28,7 @@ void UMyReticleWidgetBase::InitializeFromWeapon(UMyWeaponInstance* InWeapon)
 
 float UMyReticleWidgetBase::ComputeSpreadAngle() const
 {
-	if (const UFPSRangedWeaponInstance* RangedWeapon = Cast<const UFPSRangedWeaponInstance>(WeaponInstance))
+	if (const UFPSRangedWeaponInstance* RangedWeapon = Cast<const UFPSRangedWeaponInstance>(WeaponInstance)) // TODO: figure out how to make reticle that works for all weapon type
 	{
 		const float BaseSpreadAngle = RangedWeapon->GetCalculatedSpreadAngle();
 		const float SpreadAngleMultiplier = RangedWeapon->GetCalculatedSpreadAngleMultiplier();
@@ -44,7 +44,7 @@ float UMyReticleWidgetBase::ComputeSpreadAngle() const
 
 bool UMyReticleWidgetBase::HasFirstShotAccuracy() const
 {
-	if (const UFPSRangedWeaponInstance* RangedWeapon = Cast<const UFPSRangedWeaponInstance>(WeaponInstance))
+	if (const UFPSRangedWeaponInstance* RangedWeapon = Cast<const UFPSRangedWeaponInstance>(WeaponInstance)) // TODO: figure out how to make reticle that works for all weapon type
 	{
 		return RangedWeapon->HasFirstShotAccuracy();
 	}

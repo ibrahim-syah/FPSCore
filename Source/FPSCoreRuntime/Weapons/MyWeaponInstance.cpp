@@ -14,6 +14,10 @@ UMyWeaponInstance::UMyWeaponInstance(const FObjectInitializer& ObjectInitializer
 {
 }
 
+void UMyWeaponInstance::Tick(float DeltaSeconds)
+{
+}
+
 void UMyWeaponInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

@@ -20,6 +20,8 @@ class FPSCORERUNTIME_API UMyWeaponInstance : public ULyraWeaponInstance
 public:
 	UMyWeaponInstance(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	void Tick(float DeltaSeconds);
+
 	UFUNCTION(BlueprintPure, Category = Equipment)
 	TArray<AActor*> GetSpawnedActors_FP() const { return SpawnedActors_FP; }
 

@@ -72,6 +72,8 @@ void UFPSRangedWeaponInstance::OnUnequipped()
 
 void UFPSRangedWeaponInstance::Tick(float DeltaSeconds)
 {
+	Super::Tick(DeltaSeconds);
+
 	APawn* Pawn = GetPawn();
 	check(Pawn != nullptr);
 

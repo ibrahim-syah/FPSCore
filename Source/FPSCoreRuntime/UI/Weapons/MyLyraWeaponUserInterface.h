@@ -6,7 +6,7 @@
 #include "UI/Weapons/LyraWeaponUserInterface.h"
 #include "MyLyraWeaponUserInterface.generated.h"
 
-class UFPSRangedWeaponInstance;
+class UMyWeaponInstance;
 
 /**
  * 
@@ -21,10 +21,7 @@ public:
 
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnWeaponChanged_V2(UFPSRangedWeaponInstance* OldWeapon, UFPSRangedWeaponInstance* NewWeapon);
-
 private:
 	UPROPERTY(Transient)
-	TObjectPtr<UFPSRangedWeaponInstance> CurrentInstance_V2;
+	TObjectPtr<UMyWeaponInstance> CurrentInstance_V2;
 };

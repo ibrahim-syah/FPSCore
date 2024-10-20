@@ -44,16 +44,16 @@ public:
 	UFPSEquipmentDefinition(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	UPROPERTY(EditDefaultsOnly, Category = Equipment)
-	TArray<FMyEquipmentActorToSpawn> ActorsToSpawn_V2;
+	TArray<FMyEquipmentActorToSpawn> ActorsToSpawn_FP;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FTransform GetFPAttachTransform() const { return ActorsToSpawn_V2.Num() > 0 ? ActorsToSpawn_V2[0].AttachTransform : FTransform(); }
+	FTransform GetFPAttachTransform() const { return ActorsToSpawn_FP.Num() > 0 ? ActorsToSpawn_FP[0].AttachTransform : FTransform(); }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FName GetFPAttachSocket() const { return ActorsToSpawn_V2.Num() > 0 ? ActorsToSpawn_V2[0].AttachSocket : FName(); }
+	FName GetFPAttachSocket() const { return ActorsToSpawn_FP.Num() > 0 ? ActorsToSpawn_FP[0].AttachSocket : FName(); }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FVector GetFPOffsetRoot_LocationOffset() const { return ActorsToSpawn_V2.Num() > 0 ? ActorsToSpawn_V2[0].FP_OffsetRoot_LocationOffset : FVector(); }
+	FVector GetFPOffsetRoot_LocationOffset() const { return ActorsToSpawn_FP.Num() > 0 ? ActorsToSpawn_FP[0].FP_OffsetRoot_LocationOffset : FVector(); }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	TSubclassOf<AActor> Get3PMeshClass() const { return ActorsToSpawn.Num() > 0 ? ActorsToSpawn[0].ActorToSpawn : NULL; }

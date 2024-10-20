@@ -24,7 +24,7 @@ void UFPSRangedWeaponInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	DOREPLIFETIME(ThisClass, SpawnedActors_FP);
 }
 
-void UFPSRangedWeaponInstance::SpawnEquipmentActors_V2(const TArray<FMyEquipmentActorToSpawn>& ActorsToSpawn)
+void UFPSRangedWeaponInstance::SpawnEquipmentActors_FP(const TArray<FMyEquipmentActorToSpawn>& ActorsToSpawn)
 {
 	
 	if (APawn* OwningPawn = GetPawn())
@@ -62,14 +62,12 @@ void UFPSRangedWeaponInstance::DestroyEquipmentActors()
 	}
 }
 
-void UFPSRangedWeaponInstance::PickBestAnimLayer_V2(
+void UFPSRangedWeaponInstance::PickBestAnimLayer_FP(
 bool bEquipped,
 		const FGameplayTagContainer& CosmeticTags,
-		TSubclassOf<UAnimInstance>& TPFullBody_AnimLayer,
 		TSubclassOf<UAnimInstance>& FPArms_AnimLayer
 ) const
 {
-	const FMyAnimLayerSelectionSet& SetToQuery = (bEquipped ? EquippedAnimSet_V2 : UnequippedAnimSet_V2);
-	TPFullBody_AnimLayer = SetToQuery.SelectBestTPFullBodyLayer(CosmeticTags);
-	FPArms_AnimLayer = SetToQuery.SelectBestFPArmsLayer(CosmeticTags);
+	const FLyraAnimLayerSelectionSet& SetToQuery_FP = (bEquipped ? EquippedAnimSet_FP : UnequippedAnimSet_FP);
+	FPArms_AnimLayer = SetToQuery_FP.SelectBestLayer(CosmeticTags);
 }

@@ -20,48 +20,10 @@ struct FNetDeltaSerializeInfo;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMySpawnedCharacterPartsChanged, UMyPawnComp_CharacterParts*, ComponentWithChangedParts);
 
 ////////////////////////////////////////////////////////////////////// start of MyCosmeticAnimationTypes
-
-class UAnimInstance;
 class UPhysicsAsset;
 class USkeletalMesh;
-
-USTRUCT(BlueprintType)
-struct FMyAnimLayerSelectionEntry
-{
-	GENERATED_BODY()
-
-	// Layer to apply if the tag matches
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UAnimInstance> TPFullBody_Layer;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UAnimInstance> FPArms_Layer;
-
-	// Cosmetic tags required (all of these must be present to be considered a match)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Categories = "Cosmetic"))
-	FGameplayTagContainer RequiredTags;
-};
-
-USTRUCT(BlueprintType)
-struct FMyAnimLayerSelectionSet
-{
-	GENERATED_BODY()
-
-	// List of layer rules to apply, first one that matches will be used
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (TitleProperty = Layer))
-	TArray<FMyAnimLayerSelectionEntry> LayerRules;
-
-	// The layer to use if none of the LayerRules matches
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UAnimInstance> Default_TPFullBody_Layer;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UAnimInstance> Default_FPArms_Layer;
-
-	// Choose the best layer given the rules
-	TSubclassOf<UAnimInstance> SelectBestTPFullBodyLayer(const FGameplayTagContainer& CosmeticTags) const;
-	TSubclassOf<UAnimInstance> SelectBestFPArmsLayer(const FGameplayTagContainer& CosmeticTags) const;
-};
-
-//////////////////////////////////////////////////////////////////////
+class FLifetimeProperty;
+class UWorld;
 
 USTRUCT(BlueprintType)
 struct FMyAnimBodyStyleSelectionEntry

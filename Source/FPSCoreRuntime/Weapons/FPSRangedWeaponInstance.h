@@ -24,7 +24,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = Equipment)
 	TArray<AActor*> GetSpawnedActors_FP() const { return SpawnedActors_FP; }
 
-	virtual void SpawnEquipmentActors_V2(const TArray<FMyEquipmentActorToSpawn>& ActorsToSpawn);
+	virtual void SpawnEquipmentActors_FP(const TArray<FMyEquipmentActorToSpawn>& ActorsToSpawn);
 
 	//void Tick(float DeltaSeconds);
 
@@ -34,16 +34,15 @@ public:
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
-	FMyAnimLayerSelectionSet EquippedAnimSet_V2;
+	FLyraAnimLayerSelectionSet EquippedAnimSet_FP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
-	FMyAnimLayerSelectionSet UnequippedAnimSet_V2;
+	FLyraAnimLayerSelectionSet UnequippedAnimSet_FP;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = Animation)
-	void PickBestAnimLayer_V2(
+	void PickBestAnimLayer_FP(
 		bool bEquipped,
 		const FGameplayTagContainer& CosmeticTags,
-		TSubclassOf<UAnimInstance>& TPFullBody_AnimLayer,
 		TSubclassOf<UAnimInstance>& FPArms_AnimLayer
 		) const;
 

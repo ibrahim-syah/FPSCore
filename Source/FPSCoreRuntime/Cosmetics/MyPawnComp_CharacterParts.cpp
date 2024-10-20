@@ -12,37 +12,6 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyPawnComp_CharacterParts)
 
-class FLifetimeProperty;
-class UPhysicsAsset;
-class USkeletalMesh;
-class UWorld;
-
-TSubclassOf<UAnimInstance> FMyAnimLayerSelectionSet::SelectBestTPFullBodyLayer(const FGameplayTagContainer& CosmeticTags) const
-{
-	for (const FMyAnimLayerSelectionEntry& Rule : LayerRules)
-	{
-		if ((Rule.TPFullBody_Layer != nullptr) && CosmeticTags.HasAll(Rule.RequiredTags))
-		{
-			return Rule.TPFullBody_Layer;
-		}
-	}
-
-	return Default_TPFullBody_Layer;
-}
-
-TSubclassOf<UAnimInstance> FMyAnimLayerSelectionSet::SelectBestFPArmsLayer(const FGameplayTagContainer& CosmeticTags) const
-{
-	for (const FMyAnimLayerSelectionEntry& Rule : LayerRules)
-	{
-		if ((Rule.FPArms_Layer != nullptr) && CosmeticTags.HasAll(Rule.RequiredTags))
-		{
-			return Rule.FPArms_Layer;
-		}
-	}
-
-	return Default_FPArms_Layer;
-}
-
 USkeletalMesh* FMyAnimBodyStyleSelectionSet::SelectBestBodyStyle(const FGameplayTagContainer& CosmeticTags) const
 {
 	for (const FMyAnimBodyStyleSelectionEntry& Rule : MeshRules)

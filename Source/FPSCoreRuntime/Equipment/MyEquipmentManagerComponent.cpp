@@ -57,7 +57,7 @@ UFPSRangedWeaponInstance* FMyEquipmentList::AddEntry_V2(TSubclassOf<UFPSEquipmen
 	}
 	
 	Result->SpawnEquipmentActors(EquipmentCDO->ActorsToSpawn);
-	Result->SpawnEquipmentActors_V2(EquipmentCDO->ActorsToSpawn_V2);
+	Result->SpawnEquipmentActors_FP(EquipmentCDO->ActorsToSpawn_FP);
 
 	MarkItemDirty(NewEntry);
 

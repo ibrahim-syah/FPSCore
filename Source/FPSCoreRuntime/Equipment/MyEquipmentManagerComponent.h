@@ -6,43 +6,6 @@
 #include "Equipment/LyraEquipmentManagerComponent.h"
 #include "MyEquipmentManagerComponent.generated.h"
 
-class UFPSEquipmentDefinition;
-class UMyWeaponInstance;
-
-/** A single piece of applied equipment */
-USTRUCT(BlueprintType)
-struct FMyAppliedEquipmentEntry : public FFastArraySerializerItem
-{
-	GENERATED_BODY()
-
-	FMyAppliedEquipmentEntry()
-	{}
-
-	FString GetDebugString() const;
-
-private:
-	friend FMyEquipmentList;
-	friend UMyEquipmentManagerComponent;
-
-	// The equipment class that got equipped
-	UPROPERTY()
-	TSubclassOf<UFPSEquipmentDefinition> EquipmentDefinition;
-
-public:
-	UPROPERTY()
-	TObjectPtr<UMyWeaponInstance> Instance = nullptr;
-
-	// Authority-only list of granted handles
-	UPROPERTY(NotReplicated)
-	FLyraAbilitySet_GrantedHandles GrantedHandles;
-
-	TSubclassOf<UFPSEquipmentDefinition> GetEquipmentDefinition() const { return EquipmentDefinition; }
-	void SetEquipmentDefinition(TSubclassOf<UFPSEquipmentDefinition> InEquipmentDef) { EquipmentDefinition = InEquipmentDef; }
-
-	TObjectPtr<UMyWeaponInstance> GetEquipmentInstance() const { return Instance; }
-	void SetEquipmentInstance(TObjectPtr<UMyWeaponInstance> InInstance) { Instance = InInstance; }
-};
-
 USTRUCT(BlueprintType)
 struct FMyEquipmentList : public FFastArraySerializer
 {
@@ -60,7 +23,7 @@ struct FMyEquipmentList : public FFastArraySerializer
 
 public:
 
-	UMyWeaponInstance* AddEntry_V2(TSubclassOf<UFPSEquipmentDefinition> EquipmentDefinition);
+	ULyraEquipmentInstance* AddEntry_V2(TSubclassOf<ULyraEquipmentDefinition> EquipmentDefinition);
 	void RemoveEntry(ULyraEquipmentInstance* Instance);
 
 	void PreReplicatedRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize);
@@ -69,12 +32,12 @@ public:
 
 	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
 	{
-		return FFastArraySerializer::FastArrayDeltaSerialize<FMyAppliedEquipmentEntry, FMyEquipmentList>(Entries, DeltaParms, *this);
+		return FFastArraySerializer::FastArrayDeltaSerialize<FLyraAppliedEquipmentEntry, FMyEquipmentList>(Entries, DeltaParms, *this);
 	}
 
 	// Replicated list of equipment entries
 	UPROPERTY()
-	TArray<FMyAppliedEquipmentEntry> Entries;
+	TArray<FLyraAppliedEquipmentEntry> Entries;
 
 	UPROPERTY(NotReplicated)
 	TObjectPtr<UActorComponent> OwnerComponent;
@@ -103,11 +66,9 @@ class FPSCORERUNTIME_API UMyEquipmentManagerComponent : public ULyraEquipmentMan
 public:
 	UMyEquipmentManagerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
-	ULyraEquipmentInstance* EquipItem_V2(TSubclassOf<UFPSEquipmentDefinition> EquipmentDefinition);
+	virtual ULyraEquipmentInstance* EquipItem(TSubclassOf<ULyraEquipmentDefinition> EquipmentDefinition) override;
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
-	void UnequipItem_V2(ULyraEquipmentInstance* ItemInstance);
+	virtual void UnequipItem(ULyraEquipmentInstance* ItemInstance) override;
 
 	//~UObject interface
 	virtual bool ReplicateSubobjects(class UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
@@ -121,17 +82,15 @@ public:
 	//~End of UActorComponent interface
 
 	/** Returns the first equipped instance of a given type, or nullptr if none are found */
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	UMyWeaponInstance* GetFirstInstanceOfType_V2(TSubclassOf<UMyWeaponInstance> InstanceType);
+	virtual ULyraEquipmentInstance* GetFirstInstanceOfType(TSubclassOf<ULyraEquipmentInstance> InstanceType) override;
 
 	/** Returns all equipped instances of a given type, or an empty array if none are found */
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	TArray<UMyWeaponInstance*> GetEquipmentInstancesOfType_V2(TSubclassOf<UMyWeaponInstance> InstanceType) const;
+	virtual TArray<ULyraEquipmentInstance*> GetEquipmentInstancesOfType(TSubclassOf<ULyraEquipmentInstance> InstanceType) const override;
 
 	template <typename T>
-	T* GetFirstInstanceOfType_V2()
+	T* GetFirstInstanceOfType()
 	{
-		return (T*)GetFirstInstanceOfType_V2(T::StaticClass());
+		return (T*)GetFirstInstanceOfType(T::StaticClass());
 	}
 
 private:

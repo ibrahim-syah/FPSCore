@@ -82,7 +82,7 @@ void UMyQuickBarComponent::EquipItemInSlot()
 				{
 					if (UMyEquipmentManagerComponent* CastedEquipmentManager = Cast<UMyEquipmentManagerComponent>(EquipmentManager))
 					{
-						EquippedItem = CastedEquipmentManager->EquipItem_V2(EquipDef);
+						EquippedItem = CastedEquipmentManager->EquipItem(EquipDef);
 						if (EquippedItem != nullptr)
 						{
 							EquippedItem->SetInstigator(SlotItem);
@@ -102,7 +102,7 @@ void UMyQuickBarComponent::UnequipItemInSlot()
 		{
 			if (EquippedItem != nullptr)
 			{
-				CastedEquipmentManager->UnequipItem_V2(EquippedItem);
+				CastedEquipmentManager->UnequipItem(EquippedItem);
 				EquippedItem = nullptr;
 			}
 		}

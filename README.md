@@ -74,6 +74,7 @@ I tried my best to make minimal changes to the base Lyra classes, but changes he
         void SetEquipmentInstance(TObjectPtr<ULyraEquipmentInstance> InInstance) { Instance = InInstance; }
         ```
 - export LYRAGAME_API for ULyraEquipmentManagerComponent
+- make EquipItem, UnequipItem, GetFirstInstanceOfType and GetEquipmentInstancesOfType into virtual methods
 
 ### ULyraInventoryItemInstance -> LyraGame/Inventory/LyraInventoryItemInstance.h
 - export LYRAGAME_API for ULyraInventoryItemInstance 

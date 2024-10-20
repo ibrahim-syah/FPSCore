@@ -21,7 +21,7 @@ void UMyLyraWeaponUserInterface::NativeTick(const FGeometry& MyGeometry, float I
 	{
 		if (UMyEquipmentManagerComponent* EquipmentManager = Pawn->FindComponentByClass<UMyEquipmentManagerComponent>())
 		{
-			if (UMyWeaponInstance* NewInstance = EquipmentManager->GetFirstInstanceOfType_V2<UMyWeaponInstance>())
+			if (UMyWeaponInstance* NewInstance = EquipmentManager->GetFirstInstanceOfType<UMyWeaponInstance>())
 			{
 				if (NewInstance != CurrentInstance_V2 && NewInstance->GetInstigator() != nullptr)
 				{

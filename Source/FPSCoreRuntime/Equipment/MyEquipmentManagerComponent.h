@@ -9,6 +9,40 @@
 class UFPSEquipmentDefinition;
 class UFPSRangedWeaponInstance;
 
+/** A single piece of applied equipment */
+USTRUCT(BlueprintType)
+struct FMyAppliedEquipmentEntry : public FFastArraySerializerItem
+{
+	GENERATED_BODY()
+
+	FMyAppliedEquipmentEntry()
+	{}
+
+	FString GetDebugString() const;
+
+private:
+	friend FMyEquipmentList;
+	friend UMyEquipmentManagerComponent;
+
+	// The equipment class that got equipped
+	UPROPERTY()
+	TSubclassOf<UFPSEquipmentDefinition> EquipmentDefinition;
+
+public:
+	UPROPERTY()
+	TObjectPtr<UFPSRangedWeaponInstance> Instance = nullptr;
+
+	// Authority-only list of granted handles
+	UPROPERTY(NotReplicated)
+	FLyraAbilitySet_GrantedHandles GrantedHandles;
+
+	TSubclassOf<UFPSEquipmentDefinition> GetEquipmentDefinition() const { return EquipmentDefinition; }
+	void SetEquipmentDefinition(TSubclassOf<UFPSEquipmentDefinition> InEquipmentDef) { EquipmentDefinition = InEquipmentDef; }
+
+	TObjectPtr<UFPSRangedWeaponInstance> GetEquipmentInstance() const { return Instance; }
+	void SetEquipmentInstance(TObjectPtr<UFPSRangedWeaponInstance> InInstance) { Instance = InInstance; }
+};
+
 USTRUCT(BlueprintType)
 struct FMyEquipmentList : public FFastArraySerializer
 {
@@ -35,12 +69,12 @@ public:
 
 	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
 	{
-		return FFastArraySerializer::FastArrayDeltaSerialize<FLyraAppliedEquipmentEntry, FMyEquipmentList>(Entries, DeltaParms, *this);
+		return FFastArraySerializer::FastArrayDeltaSerialize<FMyAppliedEquipmentEntry, FMyEquipmentList>(Entries, DeltaParms, *this);
 	}
 
 	// Replicated list of equipment entries
 	UPROPERTY()
-	TArray<FLyraAppliedEquipmentEntry> Entries;
+	TArray<FMyAppliedEquipmentEntry> Entries;
 
 	UPROPERTY(NotReplicated)
 	TObjectPtr<UActorComponent> OwnerComponent;
@@ -88,11 +122,11 @@ public:
 
 	/** Returns the first equipped instance of a given type, or nullptr if none are found */
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	ULyraEquipmentInstance* GetFirstInstanceOfType_V2(TSubclassOf<ULyraEquipmentInstance> InstanceType);
+	UFPSRangedWeaponInstance* GetFirstInstanceOfType_V2(TSubclassOf<UFPSRangedWeaponInstance> InstanceType);
 
 	/** Returns all equipped instances of a given type, or an empty array if none are found */
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	TArray<ULyraEquipmentInstance*> GetEquipmentInstancesOfType_V2(TSubclassOf<ULyraEquipmentInstance> InstanceType) const;
+	TArray<UFPSRangedWeaponInstance*> GetEquipmentInstancesOfType_V2(TSubclassOf<UFPSRangedWeaponInstance> InstanceType) const;
 
 	template <typename T>
 	T* GetFirstInstanceOfType_V2()

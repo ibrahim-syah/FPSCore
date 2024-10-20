@@ -35,8 +35,6 @@ struct FMyAnimLayerSelectionEntry
 	TSubclassOf<UAnimInstance> TPFullBody_Layer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UAnimInstance> FPArms_Layer;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UAnimInstance> FPLegs_Layer;
 
 	// Cosmetic tags required (all of these must be present to be considered a match)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Categories = "Cosmetic"))
@@ -57,13 +55,10 @@ struct FMyAnimLayerSelectionSet
 	TSubclassOf<UAnimInstance> Default_TPFullBody_Layer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UAnimInstance> Default_FPArms_Layer;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UAnimInstance> Default_FPLegs_Layer;
 
 	// Choose the best layer given the rules
 	TSubclassOf<UAnimInstance> SelectBestTPFullBodyLayer(const FGameplayTagContainer& CosmeticTags) const;
 	TSubclassOf<UAnimInstance> SelectBestFPArmsLayer(const FGameplayTagContainer& CosmeticTags) const;
-	TSubclassOf<UAnimInstance> SelectBestFPLegsLayer(const FGameplayTagContainer& CosmeticTags) const;
 };
 
 //////////////////////////////////////////////////////////////////////

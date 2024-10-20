@@ -43,19 +43,6 @@ TSubclassOf<UAnimInstance> FMyAnimLayerSelectionSet::SelectBestFPArmsLayer(const
 	return Default_FPArms_Layer;
 }
 
-TSubclassOf<UAnimInstance> FMyAnimLayerSelectionSet::SelectBestFPLegsLayer(const FGameplayTagContainer& CosmeticTags) const
-{
-	for (const FMyAnimLayerSelectionEntry& Rule : LayerRules)
-	{
-		if ((Rule.FPLegs_Layer != nullptr) && CosmeticTags.HasAll(Rule.RequiredTags))
-		{
-			return Rule.FPLegs_Layer;
-		}
-	}
-
-	return Default_FPLegs_Layer;
-}
-
 USkeletalMesh* FMyAnimBodyStyleSelectionSet::SelectBestBodyStyle(const FGameplayTagContainer& CosmeticTags) const
 {
 	for (const FMyAnimBodyStyleSelectionEntry& Rule : MeshRules)

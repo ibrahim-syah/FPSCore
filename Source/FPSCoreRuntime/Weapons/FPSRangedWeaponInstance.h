@@ -21,9 +21,14 @@ class FPSCORERUNTIME_API UFPSRangedWeaponInstance : public ULyraRangedWeaponInst
 public:
 	UFPSRangedWeaponInstance(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	UFUNCTION(BlueprintPure, Category = Equipment)
+	TArray<AActor*> GetSpawnedActors_FP() const { return SpawnedActors_FP; }
+
 	virtual void SpawnEquipmentActors_V2(const TArray<FMyEquipmentActorToSpawn>& ActorsToSpawn);
 
-	void Tick(float DeltaSeconds);
+	//void Tick(float DeltaSeconds);
+
+	virtual void DestroyEquipmentActors() override;
 
 
 	
@@ -39,7 +44,9 @@ protected:
 		bool bEquipped,
 		const FGameplayTagContainer& CosmeticTags,
 		TSubclassOf<UAnimInstance>& TPFullBody_AnimLayer,
-		TSubclassOf<UAnimInstance>& FPArms_AnimLayer,
-		TSubclassOf<UAnimInstance>& FPLegs_AnimLayer
+		TSubclassOf<UAnimInstance>& FPArms_AnimLayer
 		) const;
+
+	UPROPERTY(Replicated)
+	TArray<TObjectPtr<AActor>> SpawnedActors_FP;
 };

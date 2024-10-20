@@ -8,7 +8,6 @@
 
 class UTimelineComponent;
 class USpringArmComponent;
-class UFPSRangedWeaponInstance;
 class UCameraComponent;
 
 /**
@@ -153,9 +152,6 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bIsFirstPerson = false;
-
-	/*UPROPERTY(VisibleAnywhere)
-	UFPSRangedWeaponInstance* EquippedWeapon;*/
 
 	FVector CurrentWeaponADSOffset;
 

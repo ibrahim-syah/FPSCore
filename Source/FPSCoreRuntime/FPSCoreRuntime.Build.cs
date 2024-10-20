@@ -26,22 +26,24 @@ public class FPSCoreRuntime : ModuleRules
 			new string[]
 			{
 				"Core",
-                "LyraGame",
+				"LyraGame",
 				"DeveloperSettings",
-                "NetCore",
-                "ModularGameplay",
-                "UMG",
-                "CommonUser",
-                "CommonUI",
-                "CommonInput",
-                "CommonGame",
-                "GameplayAbilities",
-                "GameplayTags",
-                "AIModule",
-                "GameplayTasks",
+				"NetCore",
+				"ModularGameplay",
+				"UMG",
+				"CommonUser",
+				"CommonUI",
+				"CommonInput",
+				"CommonGame",
+				"GameplayAbilities",
+				"GameplayTags",
+				"AIModule",
+				"GameplayTasks",
+				"PhysicsCore",
+
 				// ... add other public dependencies that you statically link with here ...
 			}
-			);
+            );
 			
 		
 		PrivateDependencyModuleNames.AddRange(
@@ -51,7 +53,8 @@ public class FPSCoreRuntime : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-                "LyraGame",
+				"LyraGame",
+
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

@@ -7,7 +7,7 @@
 #include "MyEquipmentManagerComponent.generated.h"
 
 class UFPSEquipmentDefinition;
-class UFPSRangedWeaponInstance;
+class UMyWeaponInstance;
 
 /** A single piece of applied equipment */
 USTRUCT(BlueprintType)
@@ -30,7 +30,7 @@ private:
 
 public:
 	UPROPERTY()
-	TObjectPtr<UFPSRangedWeaponInstance> Instance = nullptr;
+	TObjectPtr<UMyWeaponInstance> Instance = nullptr;
 
 	// Authority-only list of granted handles
 	UPROPERTY(NotReplicated)
@@ -39,8 +39,8 @@ public:
 	TSubclassOf<UFPSEquipmentDefinition> GetEquipmentDefinition() const { return EquipmentDefinition; }
 	void SetEquipmentDefinition(TSubclassOf<UFPSEquipmentDefinition> InEquipmentDef) { EquipmentDefinition = InEquipmentDef; }
 
-	TObjectPtr<UFPSRangedWeaponInstance> GetEquipmentInstance() const { return Instance; }
-	void SetEquipmentInstance(TObjectPtr<UFPSRangedWeaponInstance> InInstance) { Instance = InInstance; }
+	TObjectPtr<UMyWeaponInstance> GetEquipmentInstance() const { return Instance; }
+	void SetEquipmentInstance(TObjectPtr<UMyWeaponInstance> InInstance) { Instance = InInstance; }
 };
 
 USTRUCT(BlueprintType)
@@ -60,7 +60,7 @@ struct FMyEquipmentList : public FFastArraySerializer
 
 public:
 
-	UFPSRangedWeaponInstance* AddEntry_V2(TSubclassOf<UFPSEquipmentDefinition> EquipmentDefinition);
+	UMyWeaponInstance* AddEntry_V2(TSubclassOf<UFPSEquipmentDefinition> EquipmentDefinition);
 	void RemoveEntry(ULyraEquipmentInstance* Instance);
 
 	void PreReplicatedRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize);
@@ -122,11 +122,11 @@ public:
 
 	/** Returns the first equipped instance of a given type, or nullptr if none are found */
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	UFPSRangedWeaponInstance* GetFirstInstanceOfType_V2(TSubclassOf<UFPSRangedWeaponInstance> InstanceType);
+	UMyWeaponInstance* GetFirstInstanceOfType_V2(TSubclassOf<UMyWeaponInstance> InstanceType);
 
 	/** Returns all equipped instances of a given type, or an empty array if none are found */
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	TArray<UFPSRangedWeaponInstance*> GetEquipmentInstancesOfType_V2(TSubclassOf<UFPSRangedWeaponInstance> InstanceType) const;
+	TArray<UMyWeaponInstance*> GetEquipmentInstancesOfType_V2(TSubclassOf<UMyWeaponInstance> InstanceType) const;
 
 	template <typename T>
 	T* GetFirstInstanceOfType_V2()

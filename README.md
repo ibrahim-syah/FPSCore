@@ -14,6 +14,21 @@ I tried my best to make minimal changes to the base Lyra classes, but changes he
 - export LYRAGAME_API for ALyraCharacter
 - Turn CameraComponent into a protected variable
 
+### ULyraCameraComponent -> LyraGame/Camera/LyraCameraComponent.h
+- export LYRAGAME_API for ULyraCameraComponent
+
+### UPhysicalMaterialWithTags -> LyraGame/Physics/PhysicalMaterialWithTags.h
+- export LYRAGAME_API for UPhysicalMaterialWithTags
+
+### ULyraGameplayAbility_FromEquipment -> LyraGame/Equipment/LyraGameplayAbility_FromEquipment.h
+- export LYRAGAME_API for ULyraGameplayAbility_FromEquipment
+
+### FLyraGameplayAbilityTargetData_SingleTargetHit -> LyraGame/AbilitySystem/LyraGameplayAbilityTargetData_SingleTargetHit.h
+- export LYRAGAME_API for FLyraGameplayAbilityTargetData_SingleTargetHit
+
+### ULyraReticleWidgetBase -> LyraGame/Equipment/LyraGameplayAbility_FromEquipment.h
+- export LYRAGAME_API for ULyraReticleWidgetBase
+
 ### FLyraAnimLayerSelectionSet -> LyraGame/Cosmetics/LyraCosmeticAnimationTypes.h
 - export LYRAGAME_API for FLyraAnimLayerSelectionSet
 
@@ -28,6 +43,9 @@ I tried my best to make minimal changes to the base Lyra classes, but changes he
 
 ### ULyraWeaponInstance -> LyraGame/Weapons/LyraWeaponInstance.h
 - export LYRAGAME_API for ULyraWeaponInstance 
+
+### ILyraAbilitySourceInterface -> LyraGame/AbilitySystem/LyraAbilitySourceInterface.h
+- export ILyraAbilitySourceInterface
 
 ### ULyraEquipmentInstance -> LyraGame/Equipment/LyraEquipmentInstance.h
 - export LYRAGAME_API for ULyraEquipmentInstance 

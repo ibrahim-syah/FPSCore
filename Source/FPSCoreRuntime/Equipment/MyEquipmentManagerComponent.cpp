@@ -23,9 +23,9 @@ FString FMyAppliedEquipmentEntry::GetDebugString() const
 //////////////////////////////////////////////////////////////////////
 // FMyEquipmentList
 
-UFPSRangedWeaponInstance* FMyEquipmentList::AddEntry_V2(TSubclassOf<UFPSEquipmentDefinition> EquipmentDefinition)
+UMyWeaponInstance* FMyEquipmentList::AddEntry_V2(TSubclassOf<UFPSEquipmentDefinition> EquipmentDefinition)
 {
-	UFPSRangedWeaponInstance* Result = nullptr;
+	UMyWeaponInstance* Result = nullptr;
 
 	check(EquipmentDefinition != nullptr);
 	check(OwnerComponent);
@@ -34,14 +34,14 @@ UFPSRangedWeaponInstance* FMyEquipmentList::AddEntry_V2(TSubclassOf<UFPSEquipmen
 	const UFPSEquipmentDefinition* EquipmentCDO = GetDefault<UFPSEquipmentDefinition>(EquipmentDefinition);
 
 	TSubclassOf<ULyraEquipmentInstance> InstanceType = EquipmentCDO->InstanceType;
-	if (InstanceType == nullptr || !InstanceType->IsChildOf(UFPSRangedWeaponInstance::StaticClass()))
+	if (InstanceType == nullptr || !InstanceType->IsChildOf(UMyWeaponInstance::StaticClass()))
 	{
 		InstanceType = UFPSEquipmentDefinition::StaticClass();
 	}
 
 	FMyAppliedEquipmentEntry& NewEntry = Entries.AddDefaulted_GetRef();
 	NewEntry.SetEquipmentDefinition(EquipmentDefinition);
-	NewEntry.SetEquipmentInstance(NewObject<UFPSRangedWeaponInstance>(OwnerComponent->GetOwner(), InstanceType));  //@TODO: Using the actor instead of component as the outer due to UE-127172
+	NewEntry.SetEquipmentInstance(NewObject<UMyWeaponInstance>(OwnerComponent->GetOwner(), InstanceType));  //@TODO: Using the actor instead of component as the outer due to UE-127172
 	Result = NewEntry.GetEquipmentInstance();
 
 	if (ULyraAbilitySystemComponent* ASC = GetAbilitySystemComponent())
@@ -197,7 +197,7 @@ void UMyEquipmentManagerComponent::InitializeComponent()
 
 void UMyEquipmentManagerComponent::UninitializeComponent()
 {
-	TArray<ULyraEquipmentInstance*> AllEquipmentInstances;
+	TArray<UMyWeaponInstance*> AllEquipmentInstances;
 
 	// gathering all instances before removal to avoid side effects affecting the equipment list iterator	
 	for (const FMyAppliedEquipmentEntry& Entry : EquipmentList_V2.Entries)
@@ -205,7 +205,7 @@ void UMyEquipmentManagerComponent::UninitializeComponent()
 		AllEquipmentInstances.Add(Entry.GetEquipmentInstance());
 	}
 
-	for (ULyraEquipmentInstance* EquipInstance : AllEquipmentInstances)
+	for (UMyWeaponInstance* EquipInstance : AllEquipmentInstances)
 	{
 		UnequipItem_V2(EquipInstance);
 	}
@@ -232,11 +232,11 @@ void UMyEquipmentManagerComponent::ReadyForReplication()
 	}
 }
 
-UFPSRangedWeaponInstance* UMyEquipmentManagerComponent::GetFirstInstanceOfType_V2(TSubclassOf<UFPSRangedWeaponInstance> InstanceType)
+UMyWeaponInstance* UMyEquipmentManagerComponent::GetFirstInstanceOfType_V2(TSubclassOf<UMyWeaponInstance> InstanceType)
 {
 	for (FMyAppliedEquipmentEntry& Entry : EquipmentList_V2.Entries)
 	{
-		if (UFPSRangedWeaponInstance* Instance = Entry.GetEquipmentInstance())
+		if (UMyWeaponInstance* Instance = Entry.GetEquipmentInstance())
 		{
 			if (Instance->IsA(InstanceType))
 			{
@@ -248,12 +248,12 @@ UFPSRangedWeaponInstance* UMyEquipmentManagerComponent::GetFirstInstanceOfType_V
 	return nullptr;
 }
 
-TArray<UFPSRangedWeaponInstance*> UMyEquipmentManagerComponent::GetEquipmentInstancesOfType_V2(TSubclassOf<UFPSRangedWeaponInstance> InstanceType) const
+TArray<UMyWeaponInstance*> UMyEquipmentManagerComponent::GetEquipmentInstancesOfType_V2(TSubclassOf<UMyWeaponInstance> InstanceType) const
 {
-	TArray<UFPSRangedWeaponInstance*> Results;
+	TArray<UMyWeaponInstance*> Results;
 	for (const FMyAppliedEquipmentEntry& Entry : EquipmentList_V2.Entries)
 	{
-		if (UFPSRangedWeaponInstance* Instance = Entry.GetEquipmentInstance())
+		if (UMyWeaponInstance* Instance = Entry.GetEquipmentInstance())
 		{
 			if (Instance->IsA(InstanceType))
 			{

@@ -87,9 +87,9 @@ I tried my best to make minimal changes to the base Lyra classes, but changes he
 - export LYRAGAME_API for FLyraAbilitySet_GrantedHandles
 
 ### ULyraQuickBarComponent-> LyraGame/Equipment/LyraQuickBarComponent.h
-- export LYRAGAME_API for ULyraQuickBarComponent-
-make these changes:
-- turn ActiveSlotIndex, EquippedItem, and FindEquipmentManager into protected variables and method:
+- export LYRAGAME_API for ULyraQuickBarComponent
+- make these changes:
+- turn ActiveSlotIndex, EquippedItem, FindEquipmentManager, UnequipItemInSlot, and EquipItemInSlot into protected variables and method. In addition, make UnequipItemInSlot and EquipItemInSlot into virtual methods:
 	```cpp
 	UPROPERTY(ReplicatedUsing = OnRep_ActiveSlotIndex)
 	int32 ActiveSlotIndex = -1;
@@ -98,6 +98,9 @@ make these changes:
 	TObjectPtr<ULyraEquipmentInstance> EquippedItem;
 
 	ULyraEquipmentManagerComponent* FindEquipmentManager() const;
+
+        virtual void UnequipItemInSlot();
+        virtual void EquipItemInSlot();
 	```
 
 ### ULyraWeaponUserInterface -> LyraGame/UI/Weapons/LyraWeaponUserInterface.h

@@ -4,7 +4,7 @@
 #include "MyQuickBarComponent.h"
 #include "FPSEquipmentDefinition.h"
 #include "Equipment/LyraEquipmentInstance.h"
-#include "Inventory/MyInventoryFrag_EquippableItem.h"
+#include "Inventory/InventoryFragment_EquippableItem.h"
 #include "MyEquipmentManagerComponent.h"
 
 UMyQuickBarComponent::UMyQuickBarComponent(const FObjectInitializer& ObjectInitializer)
@@ -73,9 +73,9 @@ void UMyQuickBarComponent::EquipItemInSlot()
 
 	if (ULyraInventoryItemInstance* SlotItem = GetActiveSlotItem())
 	{
-		if (const UMyInventoryFrag_EquippableItem* EquipInfo = SlotItem->FindFragmentByClass<UMyInventoryFrag_EquippableItem>())
+		if (const UInventoryFragment_EquippableItem* EquipInfo = SlotItem->FindFragmentByClass<UInventoryFragment_EquippableItem>())
 		{
-			TSubclassOf<UFPSEquipmentDefinition> EquipDef = EquipInfo->EquipmentDefinition_V2;
+			TSubclassOf<ULyraEquipmentDefinition> EquipDef = EquipInfo->EquipmentDefinition;
 			if (EquipDef != nullptr)
 			{
 				if (ULyraEquipmentManagerComponent* EquipmentManager = FindEquipmentManager())

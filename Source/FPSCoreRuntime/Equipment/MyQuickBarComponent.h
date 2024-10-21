@@ -17,18 +17,9 @@ class FPSCORERUNTIME_API UMyQuickBarComponent : public ULyraQuickBarComponent
 public:
 	UMyQuickBarComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Lyra")
-	void SetActiveSlotIndex_V2(int32 NewIndex);
-
-	UFUNCTION(BlueprintCallable, Category = "Lyra")
-	void CycleActiveSlotForward_V2();
-
-	UFUNCTION(BlueprintCallable, Category = "Lyra")
-	void CycleActiveSlotBackward_V2();
-
-private:
-	void UnequipItemInSlot();
-	void EquipItemInSlot();
+protected:
+	virtual void UnequipItemInSlot() override;
+	virtual void EquipItemInSlot() override;
 
 	
 };

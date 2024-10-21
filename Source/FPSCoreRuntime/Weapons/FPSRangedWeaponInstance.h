@@ -211,7 +211,7 @@ private:
 	float CrouchingMultiplier = 1.0f;
 
 public:
-	void Tick(float DeltaSeconds);
+	virtual void Tick(float DeltaSeconds) override;
 
 	//~ULyraEquipmentInstance interface
 	virtual void OnEquipped();

@@ -103,6 +103,7 @@ make these changes:
 ### ULyraWeaponUserInterface -> LyraGame/UI/Weapons/LyraWeaponUserInterface.h
 - export LYRAGAME_API for ULyraWeaponUserInterface
 - turn RebuildWidgetFromWeapon() into a protected method
+- turn CurrentInstance into a protected variable
 
 ### ULyraWeaponStateComponent -> LyraGame/Weapons/LyraWeaponStateComponent.h
 - export LYRAGAME_API for ULyraWeaponStateComponent

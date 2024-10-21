@@ -20,8 +20,4 @@ public:
 	UMyLyraWeaponUserInterface(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
-
-private:
-	UPROPERTY(Transient)
-	TObjectPtr<UMyWeaponInstance> CurrentInstance_V2;
 };

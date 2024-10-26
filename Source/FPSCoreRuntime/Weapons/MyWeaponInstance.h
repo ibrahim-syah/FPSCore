@@ -26,10 +26,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = Equipment)
 	TArray<AActor*> GetSpawnedActors_FP() const { return SpawnedActors_FP; }
 
-	UFUNCTION(BlueprintPure, Category = Equipment)
-	AFPSPlayerCharacter* GetEquippingCharacter() const { return EquippingCharacter; }
-	void SetEquippingCharacter(AFPSPlayerCharacter* InEquippingCharacter) { EquippingCharacter = InEquippingCharacter; }
-
 	virtual void SpawnEquipmentActors_FP(const TArray<FMyEquipmentActorToSpawn>& ActorsToSpawn);
 
 	virtual void DestroyEquipmentActors() override;
@@ -53,5 +49,4 @@ protected:
 	UPROPERTY(Replicated)
 	TArray<TObjectPtr<AActor>> SpawnedActors_FP;
 
-	AFPSPlayerCharacter* EquippingCharacter;
 };

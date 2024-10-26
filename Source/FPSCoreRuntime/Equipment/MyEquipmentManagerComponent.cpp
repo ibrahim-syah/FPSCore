@@ -11,7 +11,6 @@
 #include "Weapons/FPSRangedWeaponInstance.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/ActorChannel.h"
-#include "Character/FPSPlayerCharacter.h"
 
 //////////////////////////////////////////////////////////////////////
 // FMyEquipmentList
@@ -53,7 +52,6 @@ ULyraEquipmentInstance* FMyEquipmentList::AddEntry_V2(TSubclassOf<ULyraEquipment
 	if (UMyWeaponInstance* castedInstance = Cast<UMyWeaponInstance>(Result))
 	{
 		castedInstance->SpawnEquipmentActors_FP(EquipmentCDO->ActorsToSpawn_FP);
-		castedInstance->SetEquippingCharacter(Cast<AFPSPlayerCharacter>(OwnerComponent->GetOwner()));
 	}
 
 	MarkItemDirty(NewEntry);

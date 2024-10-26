@@ -267,6 +267,11 @@ FVector AFPSPlayerCharacter::GetADSOffset() const
 	return CurrentWeaponADSOffset;
 }
 
+bool AFPSPlayerCharacter::GetIsFirstPerson() const
+{
+	return bIsFirstPerson;
+}
+
 void AFPSPlayerCharacter::SetOffsetRootLocationOffset(FVector LocationOffset)
 {
 	Offset_Root->SetRelativeLocation(Offset_Root_LocationOffsetBase + LocationOffset);

@@ -100,6 +100,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "FPSCore|FPSPlayerCharacter|Procedural FP Animation")
 	FVector GetADSOffset() const;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "FPSCore|FPSPlayerCharacter|Procedural FP Animation")
+	bool GetIsFirstPerson() const;
+
 	UFUNCTION(BlueprintCallable, Category = "FPSCore|FPSPlayerCharacter|Procedural FP Animation")
 	void SetOffsetRootLocationOffset(FVector NewLocationOffset);
 

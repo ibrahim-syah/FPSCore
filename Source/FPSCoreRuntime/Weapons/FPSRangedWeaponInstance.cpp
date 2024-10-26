@@ -5,8 +5,8 @@
 #include "NativeGameplayTags.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Camera/LyraCameraComponent.h"
 #include "Physics/PhysicalMaterialWithTags.h"
+#include "Character/FPSPlayerCharacter.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPSRangedWeaponInstance)
 
@@ -169,12 +169,11 @@ bool UFPSRangedWeaponInstance::UpdateMultipliers(float DeltaSeconds)
 {
 	const float MultiplierNearlyEqualThreshold = 0.05f;
 
-	APawn* Pawn = GetPawn();
-	check(Pawn != nullptr);
-	UCharacterMovementComponent* CharMovementComp = Cast<UCharacterMovementComponent>(Pawn->GetMovementComponent());
+	check(EquippingCharacter != nullptr);
+	UCharacterMovementComponent* CharMovementComp = Cast<UCharacterMovementComponent>(EquippingCharacter->GetMovementComponent());
 
 	// See if we are standing still, and if so, smoothly apply the bonus
-	const float PawnSpeed = Pawn->GetVelocity().Size();
+	const float PawnSpeed = EquippingCharacter->GetVelocity().Size();
 	const float MovementTargetValue = FMath::GetMappedRangeValueClamped(
 		/*InputRange=*/ FVector2D(StandingStillSpeedThreshold, StandingStillSpeedThreshold + StandingStillToMovingSpeedRange),
 		/*OutputRange=*/ FVector2D(SpreadAngleMultiplier_StandingStill, 1.0f),
@@ -194,16 +193,8 @@ bool UFPSRangedWeaponInstance::UpdateMultipliers(float DeltaSeconds)
 	JumpFallMultiplier = FMath::FInterpTo(JumpFallMultiplier, JumpFallTargetValue, DeltaSeconds, TransitionRate_JumpingOrFalling);
 	const bool bJumpFallMultiplerIs1 = FMath::IsNearlyEqual(JumpFallMultiplier, 1.0f, MultiplierNearlyEqualThreshold);
 
-	// Determine if we are aiming down sights, and apply the bonus based on how far into the camera transition we are
-	float AimingAlpha = 0.0f;
-	if (const ULyraCameraComponent* CameraComponent = ULyraCameraComponent::FindCameraComponent(Pawn))
-	{
-		float TopCameraWeight;
-		FGameplayTag TopCameraTag;
-		CameraComponent->GetBlendInfo(/*out*/ TopCameraWeight, /*out*/ TopCameraTag);
-
-		AimingAlpha = (TopCameraTag == TAG_Lyra_Weapon_SteadyAimingCamera) ? TopCameraWeight : 0.0f;
-	}
+	// Determine if we are aiming down sights, and apply the bonus based on how far into the ADS transition we are
+	float AimingAlpha = EquippingCharacter->GetADSAlpha();
 	const float AimingMultiplier = FMath::GetMappedRangeValueClamped(
 		/*InputRange=*/ FVector2D(0.0f, 1.0f),
 		/*OutputRange=*/ FVector2D(1.0f, SpreadAngleMultiplier_Aiming),

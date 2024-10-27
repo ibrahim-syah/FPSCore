@@ -152,6 +152,16 @@ void AFPSPlayerCharacter::ChangePOV(bool bShouldChangeTo1P)
 	}
 }
 
+void AFPSPlayerCharacter::ToggleCrouch()
+{
+	return;
+}
+
+void AFPSPlayerCharacter::ToggleCrouch_V2()
+{
+	Super::ToggleCrouch();
+}
+
 ////////////////////////////////////////////////////////////////////////////////// FP Procedural Animation Public Pure Getter (For AnimBP Property Access)
 
 

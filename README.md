@@ -13,6 +13,7 @@ I tried my best to make minimal changes to the base Lyra classes, but changes he
 ### ALyraCharacter -> LyraGame/Character/LyraCharacter.h
 - export LYRAGAME_API for ALyraCharacter
 - Turn CameraComponent into a protected variable
+- Turn ToggleCrouch into a virtual method
 
 ### ULyraCameraComponent -> LyraGame/Camera/LyraCameraComponent.h
 - export LYRAGAME_API for ULyraCameraComponent

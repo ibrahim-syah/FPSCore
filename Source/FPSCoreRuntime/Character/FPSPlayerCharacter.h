@@ -28,14 +28,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "FPSCore|FPSPlayerCharacter")
 	FORCEINLINE USkeletalMeshComponent* GetFirstPersonLegMesh() const { return FirstPersonLegMesh; }
 
-	/*UFUNCTION(BlueprintCallable, BlueprintPure, Category = "FPSCore|FPSPlayerCharacter|Cosmetics")
-	FORCEINLINE UFPSRangedWeaponInstance* GetEquippedWeapon() const { return EquippedWeapon; }
-
-	UFUNCTION(BlueprintCallable, Category = "FPSCore|FPSPlayerCharacter|Cosmetics")
-	void SetEquippedWeapon(UFPSRangedWeaponInstance* Weapon);*/
-
 	UFUNCTION(BlueprintCallable, Category = "FPSCore|FPSPlayerCharacter|Cosmetics")
 	void ChangePOV(bool bShouldChangeTo1P);
+
+	virtual void ToggleCrouch() override;
+	UFUNCTION(BlueprintCallable)
+	void ToggleCrouch_V2();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "FPSCore|FPSPlayerCharacter|Procedural FP Animation")
 	FVector GetLocationLagPos() const;

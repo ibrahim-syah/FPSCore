@@ -532,10 +532,11 @@ void UMyGameplayAbility_HitscanWeapon::OnTargetDataReadyCallback(const FGameplay
 		// See if we still have ammo
 		if (bIsTargetDataValid && CommitAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo))
 		{
-			// We fired the weapon, add spread
+			// We fired the weapon, add spread and recoil
 			UFPSRangedWeaponInstance* WeaponData = GetWeaponInstance();
 			check(WeaponData);
 			WeaponData->AddSpread();
+			WeaponData->AddRecoil();
 
 			// Let the blueprint do stuff like apply effects to the targets
 			OnRangedWeaponTargetDataReady(LocalTargetDataHandle);

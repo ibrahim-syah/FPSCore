@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Physics/PhysicalMaterialWithTags.h"
 #include "Character/FPSPlayerCharacter.h"
+#include <random>
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPSRangedWeaponInstance)
 
@@ -81,6 +82,58 @@ void UFPSRangedWeaponInstance::Tick(float DeltaSeconds)
 	const bool bMinMultipliers = UpdateMultipliers(DeltaSeconds);
 
 	bHasFirstShotAccuracy = bAllowFirstShotAccuracy && bMinMultipliers && bMinSpread;
+
+	if (bIsRecoilActive)
+	{
+		Pawn->AddControllerPitchInput(RecoilPitchVelocity * DeltaSeconds);
+		Pawn->AddControllerYawInput(RecoilYawVelocity * DeltaSeconds);
+
+		RecoilPitchVelocity -= RecoilPitchDamping * DeltaSeconds;
+		RecoilYawVelocity -= RecoilYawDamping * DeltaSeconds;
+
+		if (RecoilPitchVelocity <= 0.0f)
+		{
+			bIsRecoilActive = false;
+			StartRecoilRecovery();
+		}
+	}
+	else if (bIsRecoilPitchRecoveryActive)
+	{
+		FRotator currentControlRotation = Pawn->GetControlRotation();
+
+		FRotator deltaRot = currentControlRotation - RecoilCheckpoint;
+		deltaRot.Normalize();
+
+		if (deltaRot.Pitch > 1.f)
+		{
+			float interpSpeed = (1.f / DeltaSeconds) / 4.f;
+			FRotator interpRot = FMath::RInterpConstantTo(currentControlRotation, RecoilCheckpoint, DeltaSeconds, interpSpeed);
+			interpSpeed = (1.f / DeltaSeconds) / 10.f; // TODO: figure out how to make dynamic yaw recovery speed that depends on the pitch distance so that the pitch and yaw recovery ends together smoothly
+			interpRot.Yaw = FMath::RInterpTo(currentControlRotation, RecoilCheckpoint, DeltaSeconds, interpSpeed).Yaw;
+			if (!bIsRecoilYawRecoveryActive)
+			{
+				interpRot.Yaw = currentControlRotation.Yaw;
+			}
+
+			Pawn->GetController()->SetControlRotation(interpRot);
+		}
+		else if (deltaRot.Pitch > 0.1f)
+		{
+			float interpSpeed = (1.f / DeltaSeconds) / 6.f;
+			FRotator interpRot = FMath::RInterpTo(currentControlRotation, RecoilCheckpoint, DeltaSeconds, interpSpeed);
+			if (!bIsRecoilYawRecoveryActive)
+			{
+				interpRot.Yaw = currentControlRotation.Yaw;
+			}
+			Pawn->GetController()->SetControlRotation(interpRot);
+		}
+		else
+		{
+			bIsRecoilPitchRecoveryActive = false;
+			bIsRecoilYawRecoveryActive = false;
+			bIsRecoilNeutral = true;
+		}
+	}
 
 #if WITH_EDITOR
 	UpdateDebugVisualization();
@@ -209,4 +262,98 @@ bool UFPSRangedWeaponInstance::UpdateMultipliers(float DeltaSeconds)
 	return bStandingStillMultiplierAtMin && bCrouchingMultiplierAtTarget && bJumpFallMultiplerIs1 && bAimingMultiplierAtTarget;
 }
 
+float UFPSRangedWeaponInstance::SampleRecoilDirection(float x)
+{
+	// is it better to use a curve asset or just sample it directly from the function? idk man
+	return FMath::Sin((x + 5.f) * (2.f * PI / 20.f)) * (100.f - x);
+}
 
+void UFPSRangedWeaponInstance::AddRecoil()
+{
+	if (bIsRecoilNeutral)
+	{
+		RecoilCheckpoint = GetPawn()->GetControlRotation();
+		bIsRecoilNeutral = false;
+	}
+	if (bUpdateRecoilPitchCheckpointInNextShot)
+	{
+		RecoilCheckpoint = FRotator(GetPawn()->GetControlRotation().Pitch, RecoilCheckpoint.Yaw, RecoilCheckpoint.Roll);
+		bUpdateRecoilPitchCheckpointInNextShot = false;
+	}
+	if (bUpdateRecoilYawCheckpointInNextShot)
+	{
+		RecoilCheckpoint = FRotator(RecoilCheckpoint.Pitch, GetPawn()->GetControlRotation().Yaw, RecoilCheckpoint.Roll);
+		bUpdateRecoilYawCheckpointInNextShot = false;
+	}
+	StartRecoil();
+}
+
+void UFPSRangedWeaponInstance::OnLookInput(float deltaX, float deltaY)
+{
+	if (bIsRecoilPitchRecoveryActive)
+	{
+		FRotator currentRotation = GetPawn()->GetControlRotation();
+		FRotator checkpointRotation = RecoilCheckpoint;
+
+		FRotator deltaRot = (currentRotation - checkpointRotation).GetNormalized();
+
+		if (deltaY > 0.f)
+		{
+			bIsRecoilPitchRecoveryActive = false;
+			bIsRecoilNeutral = true;
+			return;
+		}
+
+		if (deltaRot.Pitch < 0.f)
+		{
+			bUpdateRecoilPitchCheckpointInNextShot = true;
+		}
+
+		if (deltaX != 0.f)
+		{
+			if (bIsRecoilYawRecoveryActive)
+			{
+				bIsRecoilYawRecoveryActive = false;
+			}
+
+			bUpdateRecoilYawCheckpointInNextShot = true;
+		}
+
+	}
+}
+
+void UFPSRangedWeaponInstance::StartRecoil()
+{
+	InitialRecoilPitchForce = BaseRecoilPitchForce;
+	InitialRecoilYawForce = BaseRecoilYawForce;
+
+	AFPSPlayerCharacter* EquippingCharacter = Cast<AFPSPlayerCharacter>(GetPawn());
+	if (bIsUseADSStabilizer)
+	{
+		CurrentADSHeat = EquippingCharacter->GetADSAlpha() > 0.f ? CurrentADSHeat + 1.f : 0.f;
+		float ADSHeatModifier = FMath::Clamp(CurrentADSHeat / MaxADSHeat, 0.f, ADSHeatModifierMax);
+		InitialRecoilPitchForce *= 1.f - ADSHeatModifier;
+		InitialRecoilYawForce *= 1.f - ADSHeatModifier;
+	}
+
+	RecoilPitchVelocity = InitialRecoilPitchForce;
+	RecoilPitchDamping = RecoilPitchVelocity / 0.1f;
+
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	float directionStat = SampleRecoilDirection(RecoilStat);
+	float directionScaleModifier = directionStat / 100.f;
+	float stddev = InitialRecoilYawForce * (1.f - RecoilStat / 100.f);
+
+	std::normal_distribution<float> d(InitialRecoilYawForce * directionScaleModifier, stddev);
+	RecoilYawVelocity = d(gen);
+	RecoilYawDamping = (RecoilYawVelocity * -1.f) / 0.1f;
+
+	bIsRecoilActive = true;
+}
+
+void UFPSRangedWeaponInstance::StartRecoilRecovery()
+{
+	bIsRecoilPitchRecoveryActive = true;
+	bIsRecoilYawRecoveryActive = true;
+}

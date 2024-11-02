@@ -211,6 +211,10 @@ bool UFPSRangedWeaponInstance::UpdateMultipliers(float DeltaSeconds)
 	// need to handle these spread multipliers indicating we are not at min spread
 	return bStandingStillMultiplierAtMin && bCrouchingMultiplierAtTarget && bJumpFallMultiplerIs1 && bAimingMultiplierAtTarget;
 }
+////////////////////////// TECH DEBT
+// on god this recoil implementation is so stateful and all over the place
+// so many flag checks it's pretty much anti-pattern at this point
+// gotta refactor this someday frfr
 
 float UFPSRangedWeaponInstance::SampleRecoilDirection(float x)
 {

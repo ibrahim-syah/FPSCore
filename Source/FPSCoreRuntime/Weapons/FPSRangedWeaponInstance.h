@@ -218,8 +218,13 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Recoil")
 	void StartRecoil();
 
+	// IMPORTANT NOTE: Higher means slower recovery speed, check out the code for more details
 	UPROPERTY(EditAnywhere, Category = "Recoil")
-	float BaseRecoilRecoverySpeed = 4.f;
+	float BaseRecoilPitchRecoverySpeed = 5.f;
+
+	// IMPORTANT NOTE: Higher means slower recovery speed, check out the code for more details
+	UPROPERTY(EditAnywhere, Category = "Recoil")
+	float BaseRecoilYawRecoverySpeed = 30.f;
 
 	UFUNCTION(BlueprintCallable, Category = "Recoil")
 	void StartRecoilRecovery();

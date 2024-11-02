@@ -3,7 +3,7 @@
 
 #include "Character/MyHeroComponent.h"
 #include "Equipment/LyraQuickBarComponent.h"
-#include "Weapons/FPSRangedWeaponInstance.h"
+#include "Weapons/MyWeaponInstance.h"
 #include "InputActionValue.h"
 
 namespace LyraHero
@@ -60,7 +60,7 @@ void UMyHeroComponent::Input_LookMouse(const FInputActionValue& InputActionValue
 	AController* PC = Pawn->GetController();
 	if (ULyraQuickBarComponent* QuickBarComp = PC->GetComponentByClass<ULyraQuickBarComponent>())
 	{
-		if (UFPSRangedWeaponInstance* weapon = Cast<UFPSRangedWeaponInstance>(QuickBarComp->GetEquippedItem()))
+		if (UMyWeaponInstance* weapon = Cast<UMyWeaponInstance>(QuickBarComp->GetEquippedItem()))
 		{
 			weapon->OnLookInput(Value.X, Value.Y);
 		}

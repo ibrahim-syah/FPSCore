@@ -30,6 +30,8 @@ public:
 
 	virtual void DestroyEquipmentActors() override;
 
+	virtual void OnLookInput(float deltaX, float deltaY);
+
 
 
 protected:

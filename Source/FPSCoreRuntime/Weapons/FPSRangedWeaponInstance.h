@@ -66,7 +66,7 @@ public:
 
 	void AddRecoil();
 
-	void OnLookInput(float deltaX, float deltaY);
+	virtual void OnLookInput(float deltaX, float deltaY) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Recoil")
 	void ResetADSHeat()

@@ -62,8 +62,8 @@ I tried my best to make minimal changes to the base Lyra classes, but changes he
 
         TObjectPtr<ULyraEquipmentInstance> GetEquipmentInstance() const { return Instance; }
         void SetEquipmentInstance(TObjectPtr<ULyraEquipmentInstance> InInstance) { Instance = InInstance; }
-
-	FLyraAbilitySet_GrantedHandles GetGrantedHandles() const { return GrantedHandles; }
+        
+        FLyraAbilitySet_GrantedHandles GetGrantedHandles() const { return GrantedHandles; }
         ```
 - export LYRAGAME_API for ULyraEquipmentManagerComponent
 - make EquipItem, UnequipItem, GetFirstInstanceOfType and GetEquipmentInstancesOfType into virtual methods

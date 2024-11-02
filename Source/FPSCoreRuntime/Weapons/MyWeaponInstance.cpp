@@ -63,6 +63,10 @@ void UMyWeaponInstance::DestroyEquipmentActors()
 	}
 }
 
+void UMyWeaponInstance::OnLookInput(float deltaX, float deltaY)
+{
+}
+
 void UMyWeaponInstance::PickBestAnimLayer_FP(
 	bool bEquipped,
 	const FGameplayTagContainer& CosmeticTags,

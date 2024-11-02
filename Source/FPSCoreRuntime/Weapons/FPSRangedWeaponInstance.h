@@ -64,6 +64,16 @@ public:
 		return BulletTraceSweepRadius;
 	}
 
+	void AddRecoil();
+
+	virtual void OnLookInput(float deltaX, float deltaY) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Recoil")
+	void ResetADSHeat()
+	{
+		CurrentADSHeat = 0;
+	}
+
 protected:
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(VisibleAnywhere, Category = "Spread|Fire Params")
@@ -184,6 +194,67 @@ protected:
 	// If more than one tag is present, the multipliers will be combined multiplicatively
 	UPROPERTY(EditAnywhere, Category = "Weapon Config")
 	TMap<FGameplayTag, float> MaterialDamageMultiplier;
+
+	UFUNCTION(BlueprintCallable, Category = "Recoil")
+	float SampleRecoilDirection(float x);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil") // might want to make this a part of attribute set?
+	float RecoilStat = 70.f;
+
+	bool bIsRecoilActive;
+
+	UPROPERTY(EditAnywhere, Category = "Recoil")
+	float BaseRecoilPitchForce = 8.f;
+	float InitialRecoilPitchForce;
+	float RecoilPitchDamping;
+	float RecoilPitchVelocity;
+
+	UPROPERTY(EditAnywhere, Category = "Recoil")
+	float BaseRecoilYawForce = 8.f;
+	float InitialRecoilYawForce;
+	float RecoilYawDamping;
+	float RecoilYawVelocity;
+
+	UFUNCTION(BlueprintCallable, Category = "Recoil")
+	void StartRecoil();
+
+	// IMPORTANT NOTE: Higher means slower recovery speed, check out the code for more details
+	UPROPERTY(EditAnywhere, Category = "Recoil")
+	float BaseRecoilPitchRecoverySpeed = 5.f;
+
+	// IMPORTANT NOTE: Higher means slower recovery speed, check out the code for more details
+	UPROPERTY(EditAnywhere, Category = "Recoil")
+	float BaseRecoilYawRecoverySpeed = 30.f;
+
+	UFUNCTION(BlueprintCallable, Category = "Recoil")
+	void StartRecoilRecovery();
+
+	void RecoilTick(float DeltaSeconds);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recoil")
+	bool bIsUseADSStabilizer = true;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recoil", meta = (EditCondition = "bIsUseADSStabilizer"))
+	float MaxADSHeat = 10.f;
+	float CurrentADSHeat = 0.f;
+
+	// When the heat value reaches its peak, this value (0 - 100 percent) is the amount to reduce the recoil
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil", meta = (EditCondition = "bIsUseADSStabilizer"))
+	float ADSHeatModifierMax = 0.75;
+
+	bool bIsRecoilPitchRecoveryActive;
+	bool bIsRecoilYawRecoveryActive;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Recoil")
+	bool bIsRecoilNeutral = true;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Recoil")
+	bool bUpdateRecoilPitchCheckpointInNextShot = false;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Recoil")
+	bool bUpdateRecoilYawCheckpointInNextShot = false;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Recoil")
+	FRotator RecoilCheckpoint;
 
 private:
 	// Time since this weapon was last fired (relative to world time)

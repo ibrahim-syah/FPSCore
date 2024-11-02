@@ -55,17 +55,6 @@ I tried my best to make minimal changes to the base Lyra classes, but changes he
 ### ULyraEquipmentManagerComponent -> LyraGame/Equipment/LyraEquipmentManagerComponent.h
 - export LYRAGAME_API for FLyraAppliedEquipmentEntry
 - make changes to FLyraAppliedEquipmentEntry:
-	- make Instance public:
-        ```cpp
-        UPROPERTY()
-        TObjectPtr<ULyraEquipmentInstance> Instance = nullptr;
-        ```
-	- make GrantedHandles public:
-        ```cpp
-        // Authority-only list of granted handles
-        UPROPERTY(NotReplicated)
-        FLyraAbilitySet_GrantedHandles GrantedHandles;
-        ```
 	- add these public functions:
         ```cpp
         TSubclassOf<ULyraEquipmentDefinition> GetEquipmentDefinition() const { return EquipmentDefinition; }
@@ -73,6 +62,8 @@ I tried my best to make minimal changes to the base Lyra classes, but changes he
 
         TObjectPtr<ULyraEquipmentInstance> GetEquipmentInstance() const { return Instance; }
         void SetEquipmentInstance(TObjectPtr<ULyraEquipmentInstance> InInstance) { Instance = InInstance; }
+        
+        FLyraAbilitySet_GrantedHandles GetGrantedHandles() const { return GrantedHandles; }
         ```
 - export LYRAGAME_API for ULyraEquipmentManagerComponent
 - make EquipItem, UnequipItem, GetFirstInstanceOfType and GetEquipmentInstancesOfType into virtual methods
@@ -95,8 +86,25 @@ I tried my best to make minimal changes to the base Lyra classes, but changes he
 ### ULyraWeaponStateComponent -> LyraGame/Weapons/LyraWeaponStateComponent.h
 - export LYRAGAME_API for ULyraWeaponStateComponent
 
-### ULyraAnimInstance -> LyraGame/Animation/ULyraAnimInstance.h
+### ULyraAnimInstance -> LyraGame/Animation/LyraAnimInstance.h
 - turn InitializeWithAbilitySystem into BlueprintCallable
+
+### ULyraHeroComponent -> LyraGame/Character/LyraHeroComponent.h
+- export LYRAGAME_API for ULyraHeroComponent
+- turn Input_LookMouse and Input_LookStick into virtual functions
+
+### ULyraQuickBarComponent -> LyraGame/Equipment/LyraQuickBarComponent.h
+- export LYRAGAME_API for ULyraQuickBarComponent
+- add a public GetEquippedItem() function that returns EquippedItem:
+```cpp
+UFUNCTION(BlueprintCallable, BlueprintPure = false)
+ULyraEquipmentInstance* GetEquippedItem() const;
+// ...
+ULyraEquipmentInstance* ULyraQuickBarComponent::GetEquippedItem() const
+{
+        return EquippedItem ? EquippedItem : nullptr;
+}
+```
 
 ## Installation
 Make sure that you have made the changes above to your Lyra classes and then just clone this repo to ```<your-project>/Plugins/GameFeatures```.

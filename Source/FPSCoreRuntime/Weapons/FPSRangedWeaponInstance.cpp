@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Physics/PhysicalMaterialWithTags.h"
 #include "Character/FPSPlayerCharacter.h"
+#include <random>
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPSRangedWeaponInstance)
 
@@ -81,6 +82,8 @@ void UFPSRangedWeaponInstance::Tick(float DeltaSeconds)
 	const bool bMinMultipliers = UpdateMultipliers(DeltaSeconds);
 
 	bHasFirstShotAccuracy = bAllowFirstShotAccuracy && bMinMultipliers && bMinSpread;
+
+	RecoilTick(DeltaSeconds);
 
 #if WITH_EDITOR
 	UpdateDebugVisualization();
@@ -208,5 +211,161 @@ bool UFPSRangedWeaponInstance::UpdateMultipliers(float DeltaSeconds)
 	// need to handle these spread multipliers indicating we are not at min spread
 	return bStandingStillMultiplierAtMin && bCrouchingMultiplierAtTarget && bJumpFallMultiplerIs1 && bAimingMultiplierAtTarget;
 }
+////////////////////////// TECH DEBT
+// on god this recoil implementation is so stateful and all over the place
+// so many flag checks it's pretty much anti-pattern at this point
+// gotta refactor this someday frfr
 
+float UFPSRangedWeaponInstance::SampleRecoilDirection(float x)
+{
+	// is it better to use a curve asset or just sample it directly from the function? idk man
+	return FMath::Sin((x + 5.f) * (2.f * PI / 20.f)) * (100.f - x);
+}
 
+void UFPSRangedWeaponInstance::AddRecoil()
+{
+	if (bIsRecoilNeutral)
+	{
+		RecoilCheckpoint = GetPawn()->GetControlRotation();
+		bIsRecoilNeutral = false;
+	}
+	if (bUpdateRecoilPitchCheckpointInNextShot)
+	{
+		RecoilCheckpoint = FRotator(GetPawn()->GetControlRotation().Pitch, RecoilCheckpoint.Yaw, RecoilCheckpoint.Roll);
+		bUpdateRecoilPitchCheckpointInNextShot = false;
+	}
+	if (bUpdateRecoilYawCheckpointInNextShot)
+	{
+		RecoilCheckpoint = FRotator(RecoilCheckpoint.Pitch, GetPawn()->GetControlRotation().Yaw, RecoilCheckpoint.Roll);
+		bUpdateRecoilYawCheckpointInNextShot = false;
+	}
+	StartRecoil();
+}
+
+void UFPSRangedWeaponInstance::OnLookInput(float deltaX, float deltaY)
+{
+	if (bIsRecoilPitchRecoveryActive)
+	{
+		FRotator currentRotation = GetPawn()->GetControlRotation();
+		FRotator checkpointRotation = RecoilCheckpoint;
+
+		FRotator deltaRot = (currentRotation - checkpointRotation).GetNormalized();
+
+		if (deltaY > 0.f)
+		{
+			bIsRecoilPitchRecoveryActive = false;
+			bIsRecoilNeutral = true;
+			return;
+		}
+
+		if (deltaRot.Pitch < 0.f)
+		{
+			bUpdateRecoilPitchCheckpointInNextShot = true;
+		}
+
+		if (deltaX != 0.f)
+		{
+			if (bIsRecoilYawRecoveryActive)
+			{
+				bIsRecoilYawRecoveryActive = false;
+			}
+
+			bUpdateRecoilYawCheckpointInNextShot = true;
+		}
+
+	}
+}
+
+void UFPSRangedWeaponInstance::StartRecoil()
+{
+	InitialRecoilPitchForce = BaseRecoilPitchForce;
+	InitialRecoilYawForce = BaseRecoilYawForce;
+
+	AFPSPlayerCharacter* EquippingCharacter = Cast<AFPSPlayerCharacter>(GetPawn());
+	if (bIsUseADSStabilizer)
+	{
+		CurrentADSHeat = EquippingCharacter->GetADSAlpha() > 0.f ? CurrentADSHeat + 1.f : 0.f;
+		float ADSHeatModifier = FMath::Clamp(CurrentADSHeat / MaxADSHeat, 0.f, ADSHeatModifierMax);
+		InitialRecoilPitchForce *= 1.f - ADSHeatModifier;
+		InitialRecoilYawForce *= 1.f - ADSHeatModifier;
+	}
+
+	RecoilPitchVelocity = InitialRecoilPitchForce;
+	RecoilPitchDamping = RecoilPitchVelocity / 0.1f;
+
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	float directionStat = SampleRecoilDirection(RecoilStat);
+	float directionScaleModifier = directionStat / 100.f;
+	float stddev = InitialRecoilYawForce * (1.f - RecoilStat / 100.f);
+
+	std::normal_distribution<float> d(InitialRecoilYawForce * directionScaleModifier, stddev);
+	RecoilYawVelocity = d(gen);
+	RecoilYawDamping = (RecoilYawVelocity * -1.f) / 0.1f;
+
+	bIsRecoilActive = true;
+}
+
+void UFPSRangedWeaponInstance::StartRecoilRecovery()
+{
+	bIsRecoilPitchRecoveryActive = true;
+	bIsRecoilYawRecoveryActive = true;
+}
+
+void UFPSRangedWeaponInstance::RecoilTick(float DeltaSeconds)
+{
+	APawn* Pawn = GetPawn();
+	if (bIsRecoilActive)
+	{
+		Pawn->AddControllerPitchInput(RecoilPitchVelocity * DeltaSeconds);
+		Pawn->AddControllerYawInput(RecoilYawVelocity * DeltaSeconds);
+
+		RecoilPitchVelocity -= RecoilPitchDamping * DeltaSeconds;
+		RecoilYawVelocity -= RecoilYawDamping * DeltaSeconds;
+
+		if (RecoilPitchVelocity <= 0.0f)
+		{
+			bIsRecoilActive = false;
+			StartRecoilRecovery();
+		}
+	}
+	else if (bIsRecoilPitchRecoveryActive)
+	{
+		FRotator currentControlRotation = Pawn->GetControlRotation();
+		FRotator deltaRot = currentControlRotation - RecoilCheckpoint;
+		deltaRot.Normalize();
+
+		if (deltaRot.Pitch <= 0.1f)
+		{
+			bIsRecoilPitchRecoveryActive = false;
+			bIsRecoilNeutral = true;
+			return;
+		}
+
+		FRotator interpRot = currentControlRotation;
+		float interpPitchSpeed = (1.f / DeltaSeconds) / BaseRecoilPitchRecoverySpeed;
+		if (deltaRot.Pitch > 1.f)
+		{
+			interpRot.Pitch = FMath::RInterpConstantTo(currentControlRotation, RecoilCheckpoint, DeltaSeconds, interpPitchSpeed).Pitch;
+
+			if (bIsRecoilYawRecoveryActive)
+			{
+				float yawDistance = FMath::Abs(deltaRot.Yaw);
+				if (yawDistance > 0.01f)
+				{
+					float interpYawSpeed = (1.f / DeltaSeconds) / BaseRecoilYawRecoverySpeed;
+					interpRot.Yaw = FMath::RInterpConstantTo(currentControlRotation, RecoilCheckpoint, DeltaSeconds, interpYawSpeed).Yaw;
+				}
+				else
+				{
+					bIsRecoilYawRecoveryActive = false;
+				}
+			}
+		}
+		else
+		{
+			interpRot.Pitch = FMath::RInterpTo(currentControlRotation, RecoilCheckpoint, DeltaSeconds, interpPitchSpeed * 0.5f).Pitch;
+		}
+		Pawn->GetController()->SetControlRotation(interpRot);
+	}
+}

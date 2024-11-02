@@ -83,57 +83,7 @@ void UFPSRangedWeaponInstance::Tick(float DeltaSeconds)
 
 	bHasFirstShotAccuracy = bAllowFirstShotAccuracy && bMinMultipliers && bMinSpread;
 
-	if (bIsRecoilActive)
-	{
-		Pawn->AddControllerPitchInput(RecoilPitchVelocity * DeltaSeconds);
-		Pawn->AddControllerYawInput(RecoilYawVelocity * DeltaSeconds);
-
-		RecoilPitchVelocity -= RecoilPitchDamping * DeltaSeconds;
-		RecoilYawVelocity -= RecoilYawDamping * DeltaSeconds;
-
-		if (RecoilPitchVelocity <= 0.0f)
-		{
-			bIsRecoilActive = false;
-			StartRecoilRecovery();
-		}
-	}
-	else if (bIsRecoilPitchRecoveryActive)
-	{
-		FRotator currentControlRotation = Pawn->GetControlRotation();
-
-		FRotator deltaRot = currentControlRotation - RecoilCheckpoint;
-		deltaRot.Normalize();
-
-		if (deltaRot.Pitch > 1.f)
-		{
-			float interpSpeed = (1.f / DeltaSeconds) / 4.f;
-			FRotator interpRot = FMath::RInterpConstantTo(currentControlRotation, RecoilCheckpoint, DeltaSeconds, interpSpeed);
-			interpSpeed = (1.f / DeltaSeconds) / 10.f; // TODO: figure out how to make dynamic yaw recovery speed that depends on the pitch distance so that the pitch and yaw recovery ends together smoothly
-			interpRot.Yaw = FMath::RInterpTo(currentControlRotation, RecoilCheckpoint, DeltaSeconds, interpSpeed).Yaw;
-			if (!bIsRecoilYawRecoveryActive)
-			{
-				interpRot.Yaw = currentControlRotation.Yaw;
-			}
-
-			Pawn->GetController()->SetControlRotation(interpRot);
-		}
-		else if (deltaRot.Pitch > 0.1f)
-		{
-			float interpSpeed = (1.f / DeltaSeconds) / 6.f;
-			FRotator interpRot = FMath::RInterpTo(currentControlRotation, RecoilCheckpoint, DeltaSeconds, interpSpeed);
-			if (!bIsRecoilYawRecoveryActive)
-			{
-				interpRot.Yaw = currentControlRotation.Yaw;
-			}
-			Pawn->GetController()->SetControlRotation(interpRot);
-		}
-		else
-		{
-			bIsRecoilPitchRecoveryActive = false;
-			bIsRecoilYawRecoveryActive = false;
-			bIsRecoilNeutral = true;
-		}
-	}
+	RecoilTick(DeltaSeconds);
 
 #if WITH_EDITOR
 	UpdateDebugVisualization();
@@ -356,4 +306,65 @@ void UFPSRangedWeaponInstance::StartRecoilRecovery()
 {
 	bIsRecoilPitchRecoveryActive = true;
 	bIsRecoilYawRecoveryActive = true;
+}
+
+void UFPSRangedWeaponInstance::RecoilTick(float DeltaSeconds)
+{
+	APawn* Pawn = GetPawn();
+	if (bIsRecoilActive)
+	{
+		Pawn->AddControllerPitchInput(RecoilPitchVelocity * DeltaSeconds);
+		Pawn->AddControllerYawInput(RecoilYawVelocity * DeltaSeconds);
+
+		RecoilPitchVelocity -= RecoilPitchDamping * DeltaSeconds;
+		RecoilYawVelocity -= RecoilYawDamping * DeltaSeconds;
+
+		if (RecoilPitchVelocity <= 0.0f)
+		{
+			bIsRecoilActive = false;
+			StartRecoilRecovery();
+		}
+	}
+	else if (bIsRecoilPitchRecoveryActive)
+	{
+		FRotator currentControlRotation = Pawn->GetControlRotation();
+		FRotator deltaRot = currentControlRotation - RecoilCheckpoint;
+		deltaRot.Normalize();
+
+		if (deltaRot.Pitch <= 0.1f)
+		{
+			bIsRecoilPitchRecoveryActive = false;
+			bIsRecoilNeutral = true;
+			return;
+		}
+
+		FRotator interpRot = currentControlRotation;
+		float interpSpeed = (1.f / DeltaSeconds) / BaseRecoilRecoverySpeed;
+		if (deltaRot.Pitch > 1.f)
+		{
+			interpRot.Pitch = FMath::RInterpConstantTo(currentControlRotation, RecoilCheckpoint, DeltaSeconds, interpSpeed).Pitch;
+
+			if (bIsRecoilYawRecoveryActive)
+			{
+				float yawDistance = FMath::Abs(deltaRot.Yaw);
+				if (yawDistance > 1.f)
+				{
+					interpRot.Yaw = FMath::RInterpConstantTo(currentControlRotation, RecoilCheckpoint, DeltaSeconds, interpSpeed).Yaw;
+				}
+				else if (yawDistance > 0.1f)
+				{
+					interpRot.Yaw = FMath::RInterpTo(currentControlRotation, RecoilCheckpoint, DeltaSeconds, interpSpeed).Yaw;
+				}
+				else
+				{
+					bIsRecoilYawRecoveryActive = false;
+				}
+			}
+		}
+		else
+		{
+			interpRot = FMath::RInterpTo(currentControlRotation, RecoilCheckpoint, DeltaSeconds, interpSpeed);
+		}
+		Pawn->GetController()->SetControlRotation(interpRot);
+	}
 }

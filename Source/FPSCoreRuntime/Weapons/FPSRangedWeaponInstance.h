@@ -218,8 +218,13 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Recoil")
 	void StartRecoil();
 
+	UPROPERTY(EditAnywhere, Category = "Recoil")
+	float BaseRecoilRecoverySpeed = 4.f;
+
 	UFUNCTION(BlueprintCallable, Category = "Recoil")
 	void StartRecoilRecovery();
+
+	void RecoilTick(float DeltaSeconds);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recoil")
 	bool bIsUseADSStabilizer = true;

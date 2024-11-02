@@ -40,7 +40,7 @@ ULyraEquipmentInstance* FMyEquipmentList::AddEntry_V2(TSubclassOf<ULyraEquipment
 	{
 		for (TObjectPtr<const ULyraAbilitySet> AbilitySet : EquipmentCDO->AbilitySetsToGrant)
 		{
-			AbilitySet->GiveToAbilitySystem(ASC, /*inout*/ &NewEntry.GrantedHandles, Result);
+			AbilitySet->GiveToAbilitySystem(ASC, /*inout*/ NewEntry.GetGrantedHandles(), Result);
 		}
 	}
 	else
@@ -64,11 +64,11 @@ void FMyEquipmentList::RemoveEntry(ULyraEquipmentInstance* Instance)
 	for (auto EntryIt = Entries.CreateIterator(); EntryIt; ++EntryIt)
 	{
 		FLyraAppliedEquipmentEntry& Entry = *EntryIt;
-		if (Entry.Instance == Instance)
+		if (Entry.GetEquipmentInstance() == Instance)
 		{
 			if (ULyraAbilitySystemComponent* ASC = GetAbilitySystemComponent())
 			{
-				Entry.GrantedHandles.TakeFromAbilitySystem(ASC);
+				Entry.GetGrantedHandles()->TakeFromAbilitySystem(ASC);
 			}
 
 			Instance->DestroyEquipmentActors();
@@ -92,9 +92,9 @@ void FMyEquipmentList::PreReplicatedRemove(const TArrayView<int32> RemovedIndice
 	for (int32 Index : RemovedIndices)
 	{
 		const FLyraAppliedEquipmentEntry& Entry = Entries[Index];
-		if (Entry.Instance != nullptr)
+		if (Entry.GetEquipmentInstance() != nullptr)
 		{
-			Entry.Instance->OnUnequipped();
+			Entry.GetEquipmentInstance()->OnUnequipped();
 		}
 	}
 }
@@ -104,9 +104,9 @@ void FMyEquipmentList::PostReplicatedAdd(const TArrayView<int32> AddedIndices, i
 	for (int32 Index : AddedIndices)
 	{
 		const FLyraAppliedEquipmentEntry& Entry = Entries[Index];
-		if (Entry.Instance != nullptr)
+		if (Entry.GetEquipmentInstance() != nullptr)
 		{
-			Entry.Instance->OnEquipped();
+			Entry.GetEquipmentInstance()->OnEquipped();
 		}
 	}
 }

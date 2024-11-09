@@ -108,6 +108,7 @@ public:
 	void Client_SetFPWeaponProps(bool IsEquip, FVector NewADSOffset, FVector NewLocationOffset);
 
 protected:
+	virtual void OnAbilitySystemInitialized() override;
 	virtual void PostInitializeComponents() override;
 	virtual void PossessedBy(AController* NewController) override;
 

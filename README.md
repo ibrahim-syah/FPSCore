@@ -88,7 +88,7 @@ I tried my best to make minimal changes to the base Lyra classes, but changes he
 - export LYRAGAME_API for ULyraWeaponStateComponent
 
 ### ULyraAnimInstance -> LyraGame/Animation/LyraAnimInstance.h
-- turn InitializeWithAbilitySystem into BlueprintCallable
+- export LYRAGAME_API for ULyraAnimInstance
 
 ### ULyraHeroComponent -> LyraGame/Character/LyraHeroComponent.h
 - export LYRAGAME_API for ULyraHeroComponent

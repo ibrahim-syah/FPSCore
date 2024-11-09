@@ -24,4 +24,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	USkeletalMeshComponent* WeaponMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	bool bIsFP;
 };

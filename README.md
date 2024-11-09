@@ -5,6 +5,7 @@ This setup is inspired by [philspaz](https://github.com/philspaz/AfootLyraExtens
 
 ## Prerequisites
 - Unreal Engine 5.4
+- AGR PRO Plugin
 - Unmodified Lyra Project
 
 ## Base Class Changes
@@ -105,6 +106,39 @@ ULyraEquipmentInstance* ULyraQuickBarComponent::GetEquippedItem() const
         return EquippedItem ? EquippedItem : nullptr;
 }
 ```
+
+### Lyra Animation Blueprints
+#### ALI_ItemAnimLayers -> Content/Characters/Heroes/Mannequin/Animations/LinkedLayers
+- duplicate LeftHandPose_OverrideState and name it UpperBodyPose_OverrideState
+
+![UppoerBodyPose_OverrideState](./Pictures/AnimationBlueprints/create-new-anim-layer.png)
+
+#### ABP_ItemAnimLayersBase -> Content/Characters/Heroes/Mannequin/Animations/LinkedLayers
+
+- duplicate SetLeftHandPoseOverrideWeight and name it SetUpperBodyPoseOverrideWeight. Then turn it like [this](https://blueprintue.com/blueprint/860h9j-9/) blueprint (create new variables where appropriate)
+
+![SetUpperBodyPoseOverrideWeight](./Pictures/AnimationBlueprints/set-upper-body-pose-override-weight.png)
+
+- implement the newly added UpperBodyPose_OverrideState animation layer with the exact same implementation as LeftHandPose_OverrideState, but with some modifications:
+  - duplicate the LeftHandePoseOverride variable and name it UpperBodyPoseOverride. This will be the pose that we use to override the whole upper body split
+  - change the blend weight to use UppoerBodyPoseOverrideWeight we just created
+  - set the OnUpdate function of the blend per bone node to use SetUpperBodyPoseOverrideWeight
+
+![anim-layer](./Pictures/AnimationBlueprints/upper-body-pose-override-state.png)
+
+#### ABP_Mannequin_Base -> Content/Characters/Heroes/Mannequin/Animations
+
+- add the new linked animation layer graph right after the LeftHandPose_OverrideState
+
+![abp-mannequin-base](./Pictures/AnimationBlueprints/abp-mannequin.png)
+
+#### ABP_WukongAnimLayers -> Plugins/FPSCore Content/Characters/Heroes/Mannequin/Animations/Locomotion/Wukong
+- set the upper body pose override to MM_Wukong_Idle and set EnableUpperBodyPoseOverride to true
+
+![abp-wukong-layer](./Pictures/AnimationBlueprints/abp-wukong-animlayers.png)
+
+If you want to add more weapons, instead of creating new set of locomotions animation (and configuring the different animation notifies and graphs for each individual sequence) you can just create a single upper body pose while still using Lyra's locomotion for everything else.
+
 
 ## Installation
 Make sure that you have made the changes above to your Lyra classes and then just clone this repo to ```<your-project>/Plugins/GameFeatures```.

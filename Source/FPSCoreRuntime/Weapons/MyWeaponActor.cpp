@@ -20,5 +20,11 @@ void AMyWeaponActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (bIsFP)
+	{
+		WeaponMesh->SetOnlyOwnerSee(true);
+		WeaponMesh->SetCastShadow(false);
+		WeaponMesh->SetBoundsScale(2.f);
+	}
 }
 

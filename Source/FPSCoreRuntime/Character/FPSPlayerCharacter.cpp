@@ -11,6 +11,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/TimelineComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Animation/LyraAnimInstance.h"
 
 
 
@@ -96,6 +97,16 @@ AFPSPlayerCharacter::AFPSPlayerCharacter(const FObjectInitializer& ObjectInitial
 	FirstPersonLegMesh->SetVisibility(false, true);
 	FirstPersonLegMesh->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 	FirstPersonLegMesh->SetRelativeLocation(FVector(0.f, 0.f, -88.f));
+}
+
+void AFPSPlayerCharacter::OnAbilitySystemInitialized()
+{
+	Super::OnAbilitySystemInitialized();
+
+	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	check(ASC);
+	Cast<ULyraAnimInstance>(FirstPersonMesh->GetAnimInstance())->InitializeWithAbilitySystem(ASC);
+	Cast<ULyraAnimInstance>(FirstPersonLegMesh->GetAnimInstance())->InitializeWithAbilitySystem(ASC);
 }
 
 void AFPSPlayerCharacter::PostInitializeComponents()

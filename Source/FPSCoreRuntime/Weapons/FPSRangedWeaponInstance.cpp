@@ -173,6 +173,11 @@ bool UFPSRangedWeaponInstance::UpdateMultipliers(float DeltaSeconds)
 	const float MultiplierNearlyEqualThreshold = 0.05f;
 
 	AFPSPlayerCharacter* EquippingCharacter = Cast<AFPSPlayerCharacter>(GetPawn());
+	if (!EquippingCharacter)
+	{
+		return false;
+	}
+
 	UCharacterMovementComponent* CharMovementComp = Cast<UCharacterMovementComponent>(EquippingCharacter->GetMovementComponent());
 
 	// See if we are standing still, and if so, smoothly apply the bonus

@@ -9,6 +9,7 @@
 class UTimelineComponent;
 class USpringArmComponent;
 class UCameraComponent;
+class UAGR_CombatManager;
 
 /**
  * 
@@ -146,16 +147,16 @@ protected:
 	TObjectPtr<UCameraComponent> FPCameraComponent;
 
 	///////////////////////////////////////////////////////////////////// Cosmetics
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	TArray<USkeletalMeshComponent*> FPCosmetics;
-
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	TArray<USkeletalMeshComponent*> TPCosmetics;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bIsFirstPerson = false;
 
 	FVector CurrentWeaponADSOffset;
+
+	///////////////////////////////////////////////////////////////////// AGR
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UAGR_CombatManager> CombatManager;
+
 
 
 

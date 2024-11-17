@@ -25,6 +25,7 @@ public class FPSCoreRuntime : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AGRPRO",
 				"Core",
 				"LyraGame",
 				"DeveloperSettings",

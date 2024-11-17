@@ -12,6 +12,8 @@
 #include "Components/TimelineComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Animation/LyraAnimInstance.h"
+#include "AGRPRO/Public/Components/AGR_CombatManager.h"
+#include "Physics/LyraCollisionChannels.h"
 
 
 
@@ -97,6 +99,10 @@ AFPSPlayerCharacter::AFPSPlayerCharacter(const FObjectInitializer& ObjectInitial
 	FirstPersonLegMesh->SetVisibility(false, true);
 	FirstPersonLegMesh->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 	FirstPersonLegMesh->SetRelativeLocation(FVector(0.f, 0.f, -88.f));
+
+	CombatManager = CreateDefaultSubobject<UAGR_CombatManager>(FName("CombatManager"));
+	CombatManager->TraceChannel = UEngineTypes::ConvertToTraceType(Lyra_TraceChannel_Weapon);
+	CombatManager->TraceSize = 30.f;
 }
 
 void AFPSPlayerCharacter::OnAbilitySystemInitialized()

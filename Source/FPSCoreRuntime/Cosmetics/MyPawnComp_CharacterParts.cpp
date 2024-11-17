@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "GameplayTagAssetInterface.h"
 #include "Character/FPSPlayerCharacter.h"
+#include "Character/FirstPersonComponent.h"
 #include "Net/UnrealNetwork.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyPawnComp_CharacterParts)
@@ -324,14 +325,14 @@ USkeletalMeshComponent* UMyPawnComp_CharacterParts::GetCosmeticMeshComponent(FMy
 					return MeshComponent;
 				}
 			case EMyCharacterPartsMeshType::Arms1P:
-				if (USkeletalMeshComponent* MeshComponent = OwningCharacter->GetFirstPersonMesh())
+				if (UFirstPersonComponent* FPComp = OwningCharacter->GetFirstPersonComponent())
 				{
-					return MeshComponent;
+					return FPComp->GetFirstPersonMesh();
 				}
 			case EMyCharacterPartsMeshType::Legs1P:
-				if (USkeletalMeshComponent* MeshComponent = OwningCharacter->GetFirstPersonLegMesh())
+				if (UFirstPersonComponent* FPComp = OwningCharacter->GetFirstPersonComponent())
 				{
-					return MeshComponent;
+					return FPComp->GetFirstPersonLegMesh();
 				}
 			default:
 				break;

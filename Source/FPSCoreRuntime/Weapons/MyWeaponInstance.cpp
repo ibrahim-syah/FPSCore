@@ -4,6 +4,7 @@
 #include "Weapons/MyWeaponInstance.h"
 #include "Cosmetics/MyPawnComp_CharacterParts.h"
 #include "Character/FPSPlayerCharacter.h"
+#include "Character/FirstPersonComponent.h"
 #include "Weapons/MyWeaponActor.h"
 #include "Equipment/FPSEquipmentDefinition.h"
 #include "Net/UnrealNetwork.h"
@@ -28,24 +29,22 @@ void UMyWeaponInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 void UMyWeaponInstance::SpawnEquipmentActors_FP(const TArray<FMyEquipmentActorToSpawn>& ActorsToSpawn)
 {
 
-	if (APawn* OwningPawn = GetPawn())
+	if (AFPSPlayerCharacter* OwningPawn = Cast<AFPSPlayerCharacter>(GetPawn()))
 	{
-
-		for (const FMyEquipmentActorToSpawn& SpawnInfo : ActorsToSpawn)
+		if (UFirstPersonComponent* FPComp = OwningPawn->GetFirstPersonComponent())
 		{
-			// Spawn and attach TP component to Fullbody mesh
-			AMyWeaponActor* NewActor = GetWorld()->SpawnActorDeferred<AMyWeaponActor>(SpawnInfo.ActorToSpawn, FTransform::Identity, OwningPawn);
-			USceneComponent* AttachTarget = OwningPawn->GetRootComponent();
-			if (AFPSPlayerCharacter* Char = Cast<AFPSPlayerCharacter>(OwningPawn))
+			for (const FMyEquipmentActorToSpawn& SpawnInfo : ActorsToSpawn)
 			{
-				AttachTarget = Char->GetFirstPersonMesh();
-				Char->Client_SetFPWeaponProps(true, SpawnInfo.FP_ADSOffset, SpawnInfo.FP_OffsetRoot_LocationOffset); // Currently this means we can only have one fp actor for each equipment, because multiple actors mean the last actor will override the offsets
-			}
-			NewActor->FinishSpawning(FTransform::Identity, /*bIsDefaultTransform=*/ true);
-			NewActor->SetActorRelativeTransform(SpawnInfo.AttachTransform);
-			NewActor->AttachToComponent(AttachTarget, FAttachmentTransformRules::KeepRelativeTransform, SpawnInfo.AttachSocket);
+				// Spawn and attach TP component to Fullbody mesh
+				AMyWeaponActor* NewActor = GetWorld()->SpawnActorDeferred<AMyWeaponActor>(SpawnInfo.ActorToSpawn, FTransform::Identity, OwningPawn);
+				USceneComponent* AttachTarget = FPComp->GetFirstPersonMesh();
+				FPComp->Client_SetFPWeaponProps(true, SpawnInfo.FP_ADSOffset, SpawnInfo.FP_OffsetRoot_LocationOffset); // Currently this means we can only have one fp actor for each equipment, because multiple actors mean the last actor will override the offsets
+				NewActor->FinishSpawning(FTransform::Identity, /*bIsDefaultTransform=*/ true);
+				NewActor->SetActorRelativeTransform(SpawnInfo.AttachTransform);
+				NewActor->AttachToComponent(AttachTarget, FAttachmentTransformRules::KeepRelativeTransform, SpawnInfo.AttachSocket);
 
-			SpawnedActors_FP.Add(NewActor);
+				SpawnedActors_FP.Add(NewActor);
+			}
 		}
 	}
 }

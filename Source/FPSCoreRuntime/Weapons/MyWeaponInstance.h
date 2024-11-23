@@ -9,6 +9,7 @@
 struct FMyAnimLayerSelectionSet;
 struct FMyEquipmentActorToSpawn;
 class AFPSPlayerCharacter;
+class UMyPawnComp_CharacterParts;
 
 /**
  * 
@@ -32,6 +33,9 @@ public:
 
 	virtual void OnLookInput(float deltaX, float deltaY);
 
+	virtual void OnEquipped() override;
+	virtual void OnUnequipped() override;
+
 
 
 protected:
@@ -41,14 +45,40 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
 	FLyraAnimLayerSelectionSet UnequippedAnimSet_FP;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
+	TObjectPtr<UAnimMontage> WeaponEquipMontageTP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
+	TObjectPtr<UAnimMontage> WeaponUnequipMontageTP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
+	TObjectPtr<UAnimMontage> WeaponEquipMontageFP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
+	TObjectPtr<UAnimMontage> WeaponUnequipMontageFP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
+	TObjectPtr<UAnimMontage> WeaponQuickMeleeTP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
+	TObjectPtr<UAnimMontage> WeaponQuickMeleeFP;
+
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = Animation)
-	void PickBestAnimLayer_FP(
+	TSubclassOf<UAnimInstance> PickBestAnimLayer_FP(
 		bool bEquipped,
-		const FGameplayTagContainer& CosmeticTags,
-		TSubclassOf<UAnimInstance>& FPArms_AnimLayer
+		const FGameplayTagContainer& CosmeticTags
 	) const;
 
 	UPROPERTY(Replicated)
 	TArray<TObjectPtr<AActor>> SpawnedActors_FP;
+
+	UPROPERTY(BlueprintReadOnly, Category = Animation)
+	TObjectPtr<UMyPawnComp_CharacterParts> CosmeticComponent;
+
+	UPROPERTY(BlueprintReadOnly, Category = Animation)
+	FGameplayTagContainer CosmeticAnimStyleTags;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure = false)
+	void DetermineCosmeticTags();
 
 };

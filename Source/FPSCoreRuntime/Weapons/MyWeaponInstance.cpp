@@ -67,12 +67,38 @@ void UMyWeaponInstance::OnLookInput(float deltaX, float deltaY)
 {
 }
 
-void UMyWeaponInstance::PickBestAnimLayer_FP(
+void UMyWeaponInstance::OnEquipped()
+{
+	Super::OnEquipped();
+
+	// IMPORTANT: the blueprint implementation is executed first from the original lyraequipmentinstance (K2_OnEquipped)
+}
+
+void UMyWeaponInstance::OnUnequipped()
+{
+	Super::OnUnequipped();
+}
+
+TSubclassOf<UAnimInstance> UMyWeaponInstance::PickBestAnimLayer_FP(
 	bool bEquipped,
-	const FGameplayTagContainer& CosmeticTags,
-	TSubclassOf<UAnimInstance>& FPArms_AnimLayer
+	const FGameplayTagContainer& CosmeticTags
 ) const
 {
 	const FLyraAnimLayerSelectionSet& SetToQuery_FP = (bEquipped ? EquippedAnimSet_FP : UnequippedAnimSet_FP);
-	FPArms_AnimLayer = SetToQuery_FP.SelectBestLayer(CosmeticTags);
+	return SetToQuery_FP.SelectBestLayer(CosmeticTags);
+}
+
+void UMyWeaponInstance::DetermineCosmeticTags()
+{
+	if (AFPSPlayerCharacter* Character = Cast<AFPSPlayerCharacter>(GetPawn()))
+	{
+		if (UActorComponent* comp = Character->GetComponentByClass(UMyPawnComp_CharacterParts::StaticClass()))
+		{
+			CosmeticComponent = Cast<UMyPawnComp_CharacterParts>(comp);
+			if (IsValid(CosmeticComponent))
+			{
+				CosmeticAnimStyleTags = CosmeticComponent->GetCombinedTags(FGameplayTag::RequestGameplayTag("Cosmetic.AnimationStyle"));
+			}
+		}
+	}
 }

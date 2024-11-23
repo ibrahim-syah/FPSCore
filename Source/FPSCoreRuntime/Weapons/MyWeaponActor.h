@@ -23,7 +23,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	USkeletalMeshComponent* WeaponMesh;
+	TObjectPtr<USkeletalMeshComponent> WeaponMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
 	bool bIsFP;

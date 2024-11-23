@@ -318,7 +318,6 @@ void AFPSPlayerCharacter::SetFPWeaponProps(bool IsEquip, const FVector& NewADSOf
 {
 	if (HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("set fp weapon props from server"))
 		HasWeaponAlpha = IsEquip ? 1.f : 0.f;
 		CurrentWeaponADSOffset = NewADSOffset;
 		CurrentWeaponRelativeFPRootOffset = NewLocationOffset;

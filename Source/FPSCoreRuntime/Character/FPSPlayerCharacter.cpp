@@ -14,6 +14,7 @@
 #include "Animation/LyraAnimInstance.h"
 #include "AGRPRO/Public/Components/AGR_CombatManager.h"
 #include "Physics/LyraCollisionChannels.h"
+#include "Net/UnrealNetwork.h"
 
 
 
@@ -77,7 +78,7 @@ AFPSPlayerCharacter::AFPSPlayerCharacter(const FObjectInitializer& ObjectInitial
 	FirstPersonMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	FirstPersonMesh->SetCollisionProfileName(FName("NoCollision"));
 	FirstPersonMesh->bReceivesDecals = false;
-	FirstPersonMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	FirstPersonMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 	FirstPersonMesh->CastShadow = false;
 	FirstPersonMesh->SetVisibility(false, true);
 	FirstPersonMesh->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
@@ -85,7 +86,7 @@ AFPSPlayerCharacter::AFPSPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 	USkeletalMeshComponent* MeshComp = GetMesh();
 	check(MeshComp);
-	MeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
+	MeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 	MeshComp->bCastHiddenShadow = true;
 	MeshComp->SetRelativeLocation(FVector(0.f, 0.f, -88.f));
 
@@ -94,7 +95,7 @@ AFPSPlayerCharacter::AFPSPlayerCharacter(const FObjectInitializer& ObjectInitial
 	FirstPersonLegMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	FirstPersonLegMesh->SetCollisionProfileName(FName("NoCollision"));
 	FirstPersonLegMesh->bReceivesDecals = false;
-	FirstPersonLegMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	FirstPersonLegMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 	FirstPersonLegMesh->CastShadow = false;
 	FirstPersonLegMesh->SetVisibility(false, true);
 	FirstPersonLegMesh->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
@@ -137,16 +138,23 @@ void AFPSPlayerCharacter::PossessedBy(AController* NewController)
 	}*/
 }
 
+void AFPSPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(AFPSPlayerCharacter, HasWeaponAlpha, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(AFPSPlayerCharacter, CurrentWeaponADSOffset, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(AFPSPlayerCharacter, CurrentWeaponRelativeFPRootOffset, COND_OwnerOnly);
+}
+
+
 void AFPSPlayerCharacter::ChangePOV(bool bShouldChangeTo1P)
 {
 	ALyraPlayerController* PC = GetLyraPlayerController();
 	if (PC && PC->IsLocalPlayerController())
 	{
-		FirstPersonMesh->SetVisibility(bShouldChangeTo1P, true);
-		FirstPersonLegMesh->SetVisibility(bShouldChangeTo1P, true);
-		GetMesh()->SetVisibility(!bShouldChangeTo1P, true);
 		bIsFirstPerson = bShouldChangeTo1P;
-
+		RefreshMeshVisibility();
 		if (bShouldChangeTo1P)
 		{
 			// Move third person mesh back so that the shadow doesn't look disconnected
@@ -177,6 +185,13 @@ void AFPSPlayerCharacter::ToggleCrouch()
 void AFPSPlayerCharacter::ToggleCrouch_V2()
 {
 	Super::ToggleCrouch();
+}
+
+void AFPSPlayerCharacter::RefreshMeshVisibility()
+{
+	FirstPersonMesh->SetVisibility(bIsFirstPerson, true);
+	FirstPersonLegMesh->SetVisibility(bIsFirstPerson, true);
+	GetMesh()->SetVisibility(!bIsFirstPerson, true);
 }
 
 ////////////////////////////////////////////////////////////////////////////////// FP Procedural Animation Public Pure Getter (For AnimBP Property Access)
@@ -299,17 +314,21 @@ bool AFPSPlayerCharacter::GetIsFirstPerson() const
 	return bIsFirstPerson;
 }
 
-void AFPSPlayerCharacter::SetOffsetRootLocationOffset(FVector LocationOffset)
+void AFPSPlayerCharacter::SetFPWeaponProps(bool IsEquip, const FVector& NewADSOffset, const FVector& NewLocationOffset)
 {
-	Offset_Root->SetRelativeLocation(Offset_Root_LocationOffsetBase + LocationOffset);
+	if (HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("set fp weapon props from server"))
+		HasWeaponAlpha = IsEquip ? 1.f : 0.f;
+		CurrentWeaponADSOffset = NewADSOffset;
+		CurrentWeaponRelativeFPRootOffset = NewLocationOffset;
+		OnRep_CurrentWeaponRelativeFPRootOffset();
+	}
 }
 
-void AFPSPlayerCharacter::Client_SetFPWeaponProps_Implementation(bool IsEquip, FVector NewADSOffset, FVector NewLocationOffset)
+void AFPSPlayerCharacter::OnRep_CurrentWeaponRelativeFPRootOffset()
 {
-	IsEquip ? SetHasWeaponAlpha(1.f) : SetHasWeaponAlpha(0.f);
-	CurrentWeaponADSOffset = NewADSOffset;
-	SetOffsetRootLocationOffset(NewLocationOffset);
-	//SetEquippedWeapon(Weapon);
+	Offset_Root->SetRelativeLocation(Offset_Root_LocationOffsetBase + CurrentWeaponRelativeFPRootOffset);
 }
 
 ///////////////////////////////////////////////////////////// CROUCHING & SLIDING
@@ -485,7 +504,7 @@ void AFPSPlayerCharacter::UpdateVelocityVars()
 	InAirOffset = interpedInAirOffsetVec;
 }
 
-void AFPSPlayerCharacter::UpdateLookInputVars(FRotator CamRotPrev)
+void AFPSPlayerCharacter::UpdateLookInputVars(const FRotator& CamRotPrev)
 {
 	// Step 1: determining how much to offset the viewmodel based
 	// on our current camera pitch

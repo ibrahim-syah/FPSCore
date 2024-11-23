@@ -36,6 +36,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ToggleCrouch_V2();
 
+	UFUNCTION(BlueprintCallable)
+	void RefreshMeshVisibility();
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "FPSCore|FPSPlayerCharacter|Procedural FP Animation")
 	FVector GetLocationLagPos() const;
 
@@ -102,11 +105,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "FPSCore|FPSPlayerCharacter|Procedural FP Animation")
 	bool GetIsFirstPerson() const;
 
-	UFUNCTION(BlueprintCallable, Category = "FPSCore|FPSPlayerCharacter|Procedural FP Animation")
-	void SetOffsetRootLocationOffset(FVector NewLocationOffset);
+	void SetFPWeaponProps(bool IsEquip, const FVector& NewADSOffset, const FVector& NewLocationOffset);
 
-	UFUNCTION(Client, Reliable, BlueprintCallable)
-	void Client_SetFPWeaponProps(bool IsEquip, FVector NewADSOffset, FVector NewLocationOffset);
+private:
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 
 protected:
 	virtual void OnAbilitySystemInitialized() override;
@@ -114,13 +116,13 @@ protected:
 	virtual void PossessedBy(AController* NewController) override;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	USceneComponent* FP_Root;
+	TObjectPtr<USceneComponent> FP_Root;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	USpringArmComponent* Mesh_Root;
+	TObjectPtr<USpringArmComponent> Mesh_Root;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	USceneComponent* Offset_Root;
+	TObjectPtr<USceneComponent> Offset_Root;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	FVector Offset_Root_LocationOffsetBase;
@@ -129,19 +131,19 @@ protected:
 	FVector StartingThirdPersonMeshLocation;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	USkeletalMeshComponent* FirstPersonMesh;
+	TObjectPtr<USkeletalMeshComponent> FirstPersonMesh;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	USkeletalMeshComponent* FirstPersonLegMesh;
+	TObjectPtr<USkeletalMeshComponent> FirstPersonLegMesh;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	float InvisibleBodyMeshOffsetLength{ -60.f };
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	USpringArmComponent* Cam_Root = nullptr;
+	TObjectPtr<USpringArmComponent> Cam_Root = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	USkeletalMeshComponent* Cam_Skel;
+	TObjectPtr<USkeletalMeshComponent> Cam_Skel;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	TObjectPtr<UCameraComponent> FPCameraComponent;
@@ -151,7 +153,14 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bIsFirstPerson = false;
 
+	UPROPERTY(Replicated)
 	FVector CurrentWeaponADSOffset;
+
+	UPROPERTY(ReplicatedUsing=OnRep_CurrentWeaponRelativeFPRootOffset)
+	FVector CurrentWeaponRelativeFPRootOffset;
+
+	UFUNCTION()
+	void OnRep_CurrentWeaponRelativeFPRootOffset();
 
 	///////////////////////////////////////////////////////////////////// AGR
 	UPROPERTY(BlueprintReadOnly)
@@ -188,6 +197,7 @@ protected:
 	float CrouchAlpha{ 0.f };
 
 	////////// walking
+	UPROPERTY(Replicated)
 	float HasWeaponAlpha;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement, meta = (AllowPrivateAccess = "true"))
@@ -209,7 +219,7 @@ protected:
 	FRotator CamRotRate;
 	FVector InAirOffset;
 	FRotator InAirTilt;
-	void UpdateLookInputVars(FRotator CamRotPrev);
+	void UpdateLookInputVars(const FRotator& CamRotPrev);
 
 	void ProcCamAnim(FVector& CamOffsetArg, float& CamAnimAlphaArg);
 	FVector PrevHandLoc;

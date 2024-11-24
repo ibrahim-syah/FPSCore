@@ -18,13 +18,28 @@ public:
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "Weapon")
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
 
+	UFUNCTION(BlueprintCallable)
+	virtual void Fire(const TArray<FVector>& InImpactPositions, const TArray<FVector>& InImpactNormals, const TArray<TEnumAsByte<EPhysicalSurface>>& InImpactSurfaceTypes);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Fire"))
+	void K2_Fire();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
 	bool bIsFP;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FVector> ImpactPositions;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FVector> ImpactNormals;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<TEnumAsByte<EPhysicalSurface>> ImpactSurfaceTypes;
 };

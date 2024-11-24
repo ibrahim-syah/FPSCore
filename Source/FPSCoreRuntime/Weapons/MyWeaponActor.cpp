@@ -15,6 +15,15 @@ AMyWeaponActor::AMyWeaponActor()
 	WeaponMesh->bCastHiddenShadow = true;
 }
 
+void AMyWeaponActor::Fire(const TArray<FVector>& InImpactPositions, const TArray<FVector>& InImpactNormals, const TArray<TEnumAsByte<EPhysicalSurface>>& InImpactSurfaceTypes)
+{
+	ImpactPositions = InImpactPositions;
+	ImpactNormals = InImpactNormals;
+	ImpactSurfaceTypes = InImpactSurfaceTypes;
+
+	K2_Fire();
+}
+
 // Called when the game starts or when spawned
 void AMyWeaponActor::BeginPlay()
 {

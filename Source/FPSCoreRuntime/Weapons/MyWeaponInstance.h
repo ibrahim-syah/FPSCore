@@ -81,4 +81,6 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure = false)
 	void DetermineCosmeticTags();
 
+	void ActivateAnimLayerAndPlayPairedAnim(bool Equipped, UAnimMontage* FPMontage, UAnimMontage* TPMontage);
+
 };

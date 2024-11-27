@@ -8,7 +8,6 @@
 #include "Equipment/FPSEquipmentDefinition.h"
 #include "Net/UnrealNetwork.h"
 
-
 UMyWeaponInstance::UMyWeaponInstance(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -69,13 +68,24 @@ void UMyWeaponInstance::OnLookInput(float deltaX, float deltaY)
 
 void UMyWeaponInstance::OnEquipped()
 {
-	Super::OnEquipped();
+	AFPSPlayerCharacter* Char = Cast<AFPSPlayerCharacter>(GetPawn());
+	AController* PC = Char->GetController();
+	if (PC && PC->IsLocalPlayerController())
+	{
+		Char->RefreshMeshVisibility();
+	}
+	DetermineCosmeticTags();
 
-	// IMPORTANT: the blueprint implementation is executed first from the original lyraequipmentinstance (K2_OnEquipped)
+	ActivateAnimLayerAndPlayPairedAnim(true, WeaponEquipMontageFP, WeaponEquipMontageTP);
+
+	// IMPORTANT: the blueprint implementation is executed from the original lyraequipmentinstance (K2_OnEquipped)
+	Super::OnEquipped();
 }
 
 void UMyWeaponInstance::OnUnequipped()
 {
+	ActivateAnimLayerAndPlayPairedAnim(true, WeaponUnequipMontageFP, WeaponUnequipMontageTP);
+
 	Super::OnUnequipped();
 }
 
@@ -100,5 +110,26 @@ void UMyWeaponInstance::DetermineCosmeticTags()
 				CosmeticAnimStyleTags = CosmeticComponent->GetCombinedTags(FGameplayTag::RequestGameplayTag("Cosmetic.AnimationStyle"));
 			}
 		}
+	}
+}
+
+void UMyWeaponInstance::ActivateAnimLayerAndPlayPairedAnim(bool Equipped, UAnimMontage* FPMontage, UAnimMontage* TPMontage)
+{
+	AFPSPlayerCharacter* Character = Cast<AFPSPlayerCharacter>(GetPawn());
+	if (!CosmeticAnimStyleTags.IsEmpty())
+	{
+		USkeletalMeshComponent* FPMesh = Character->GetFirstPersonMesh();
+		if (TSubclassOf<UAnimInstance> ChosenAnimLayer = PickBestAnimLayer_FP(Equipped, CosmeticAnimStyleTags))
+		{
+			FPMesh->LinkAnimClassLayers(ChosenAnimLayer);
+		}
+		FPMesh->GetAnimInstance()->Montage_Play(FPMontage);
+
+		USkeletalMeshComponent* TPMesh = Character->GetMesh();
+		if (TSubclassOf<UAnimInstance> ChosenAnimLayer = PickBestAnimLayer(Equipped, CosmeticAnimStyleTags))
+		{
+			TPMesh->LinkAnimClassLayers(ChosenAnimLayer);
+		}
+		TPMesh->GetAnimInstance()->Montage_Play(TPMontage);
 	}
 }

@@ -79,14 +79,15 @@ AFPSPlayerCharacter::AFPSPlayerCharacter(const FObjectInitializer& ObjectInitial
 	FirstPersonMesh->SetCollisionProfileName(FName("NoCollision"));
 	FirstPersonMesh->bReceivesDecals = false;
 	FirstPersonMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
-	FirstPersonMesh->CastShadow = false;
+	FirstPersonMesh->SetOnlyOwnerSee(true);
+	FirstPersonMesh->SetCastShadow(false);
 	FirstPersonMesh->SetVisibility(false, true);
 	FirstPersonMesh->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 	FirstPersonMesh->SetRelativeLocation(FVector(0.f, 0.f, -88.f));
 
 	USkeletalMeshComponent* MeshComp = GetMesh();
 	check(MeshComp);
-	MeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	MeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
 	MeshComp->bCastHiddenShadow = true;
 	MeshComp->SetRelativeLocation(FVector(0.f, 0.f, -88.f));
 
@@ -96,7 +97,8 @@ AFPSPlayerCharacter::AFPSPlayerCharacter(const FObjectInitializer& ObjectInitial
 	FirstPersonLegMesh->SetCollisionProfileName(FName("NoCollision"));
 	FirstPersonLegMesh->bReceivesDecals = false;
 	FirstPersonLegMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
-	FirstPersonLegMesh->CastShadow = false;
+	FirstPersonLegMesh->SetOnlyOwnerSee(true);
+	FirstPersonLegMesh->SetCastShadow(false);
 	FirstPersonLegMesh->SetVisibility(false, true);
 	FirstPersonLegMesh->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 	FirstPersonLegMesh->SetRelativeLocation(FVector(0.f, 0.f, -88.f));
@@ -112,8 +114,13 @@ void AFPSPlayerCharacter::OnAbilitySystemInitialized()
 
 	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
 	check(ASC);
-	Cast<ULyraAnimInstance>(FirstPersonMesh->GetAnimInstance())->InitializeWithAbilitySystem(ASC);
-	Cast<ULyraAnimInstance>(FirstPersonLegMesh->GetAnimInstance())->InitializeWithAbilitySystem(ASC);
+
+	AController* PC = GetController();
+	if (PC && PC->IsLocalPlayerController())
+	{
+		Cast<ULyraAnimInstance>(FirstPersonMesh->GetAnimInstance())->InitializeWithAbilitySystem(ASC);
+		Cast<ULyraAnimInstance>(FirstPersonLegMesh->GetAnimInstance())->InitializeWithAbilitySystem(ASC);
+	}
 }
 
 void AFPSPlayerCharacter::PostInitializeComponents()

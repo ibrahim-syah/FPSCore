@@ -166,6 +166,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Cosmetics)
 	TArray<FMyControllerCharacterPartEntry> CharacterParts;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	AController* GetOwningController() { return GetController<AController>(); }
+
 private:
 	UMyPawnComp_CharacterParts* GetPawnCustomizer() const;
 

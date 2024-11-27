@@ -118,12 +118,14 @@ void UMyWeaponInstance::ActivateAnimLayerAndPlayPairedAnim(bool Equipped, UAnimM
 	AFPSPlayerCharacter* Character = Cast<AFPSPlayerCharacter>(GetPawn());
 	if (!CosmeticAnimStyleTags.IsEmpty())
 	{
-		USkeletalMeshComponent* FPMesh = Character->GetFirstPersonMesh();
-		if (TSubclassOf<UAnimInstance> ChosenAnimLayer = PickBestAnimLayer_FP(Equipped, CosmeticAnimStyleTags))
+		if (USkeletalMeshComponent* FPMesh = Character->GetFirstPersonMesh())
 		{
-			FPMesh->LinkAnimClassLayers(ChosenAnimLayer);
+			if (TSubclassOf<UAnimInstance> ChosenAnimLayer = PickBestAnimLayer_FP(Equipped, CosmeticAnimStyleTags))
+			{
+				FPMesh->LinkAnimClassLayers(ChosenAnimLayer);
+			}
+			FPMesh->GetAnimInstance()->Montage_Play(FPMontage);
 		}
-		FPMesh->GetAnimInstance()->Montage_Play(FPMontage);
 
 		USkeletalMeshComponent* TPMesh = Character->GetMesh();
 		if (TSubclassOf<UAnimInstance> ChosenAnimLayer = PickBestAnimLayer(Equipped, CosmeticAnimStyleTags))

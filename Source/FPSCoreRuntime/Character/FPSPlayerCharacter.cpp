@@ -51,6 +51,7 @@ AFPSPlayerCharacter::AFPSPlayerCharacter(const FObjectInitializer& ObjectInitial
 	Cam_Skel = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Cam_Skel"));
 	Cam_Skel->SetupAttachment(Cam_Root);
 	Cam_Skel->SetRelativeLocation(FVector(0.f, 0.f, -60.f));
+	Cam_Skel->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 
 	FPCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FPCameraComponent"));
 	FPCameraComponent->SetRelativeLocation(FVector(0.f, 0.0f, 60.f));

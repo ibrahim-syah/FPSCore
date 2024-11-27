@@ -96,6 +96,18 @@ I tried my best to make minimal changes to the base Lyra classes, but changes he
 
 ### ULyraQuickBarComponent -> LyraGame/Equipment/LyraQuickBarComponent.h
 - export LYRAGAME_API for ULyraQuickBarComponent
+- make EquippedItem into a replicated property
+```cpp
+// ...
+UPROPERTY(Replicated)
+TObjectPtr<ULyraEquipmentInstance> EquippedItem;
+// ...
+void ULyraQuickBarComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	// ...
+	DOREPLIFETIME(ThisClass, EquippedItem);
+}
+```
 - add a public GetEquippedItem() function that returns EquippedItem:
 ```cpp
 UFUNCTION(BlueprintCallable, BlueprintPure = false)

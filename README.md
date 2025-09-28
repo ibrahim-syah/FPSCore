@@ -122,7 +122,7 @@ ULyraEquipmentInstance* ULyraQuickBarComponent::GetEquippedItem() const
 - implement the newly added UpperBodyPose_OverrideState animation layer with the exact same implementation as LeftHandPose_OverrideState, but with some modifications:
   - duplicate the LeftHandePoseOverride variable and name it UpperBodyPoseOverride. This will be the pose that we use to override the whole upper body split
   - change the blend weight to use UppoerBodyPoseOverrideWeight we just created
-  - set the OnUpdate function of the blend per bone node to use SetUpperBodyPoseOverrideWeight
+  - set the OnUpdate function of the blend per bone node to use SetUpperBodyPoseOverrideWeight. Also set the Blend Masks to UpperBodyMask
 
 ![anim-layer](./Pictures/AnimationBlueprints/upper-body-pose-override-state.png)
 
